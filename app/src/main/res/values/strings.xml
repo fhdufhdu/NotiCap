@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">NotiCap</string>
+    <string name="channel_name">카카오톡 알림 캡쳐</string>
+    <string name="channel_description">카카오톡 알림을 가져와서 히스토리와 함께 보여줍니다.</string>
+</resources>
