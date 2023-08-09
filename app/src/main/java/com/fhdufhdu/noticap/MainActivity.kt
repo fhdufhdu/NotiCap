@@ -1,4 +1,4 @@
-package com.example.noticap
+package com.fhdufhdu.noticap
 
 import android.Manifest
 import android.app.NotificationManager
@@ -9,10 +9,8 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
-import com.example.noticap.v1.MyNotiListenerService
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.normal.TedPermission
 
@@ -43,7 +41,7 @@ class MainActivity : AppCompatActivity() {
     private fun isNotiPermissionGranted(): Boolean {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            return notificationManager.isNotificationListenerAccessGranted(ComponentName(application, MyNotiListenerService::class.java))
+            return notificationManager.isNotificationListenerAccessGranted(ComponentName(application, MyNotificationListenerService::class.java))
         }
         else {
             return NotificationManagerCompat.getEnabledListenerPackages(applicationContext).contains(applicationContext.packageName)

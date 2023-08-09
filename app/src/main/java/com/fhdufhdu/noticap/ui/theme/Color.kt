@@ -1,4 +1,4 @@
-package com.example.noticap.ui.theme
+package com.fhdufhdu.noticap.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

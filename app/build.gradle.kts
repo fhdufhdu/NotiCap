@@ -4,12 +4,12 @@ plugins {
 }
 
 android {
-    namespace = "com.example.noticap"
+    namespace = "com.fhdufhdu.noticap"
     compileSdk = 33
 
     defaultConfig {
-        applicationId = "com.example.noticap"
-        minSdk = 24
+        applicationId = "com.fhdufhdu.noticap"
+        minSdk = 26
         targetSdk = 33
         versionCode = 1
         versionName = "1.0"
