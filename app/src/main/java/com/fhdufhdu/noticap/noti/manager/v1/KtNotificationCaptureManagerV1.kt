@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.service.notification.StatusBarNotification
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.preference.PreferenceManager
@@ -131,11 +132,12 @@ class KtNotificationCaptureManagerV1 {
             } while (existId)
             notificationIdList[id] = true
             notificationMap[nd.chatroomName] =
-                KtNotificationDataV1(id, nd.chatroomName, ktChannelId)
+                KtNotificationDataV1(id, nd.chatroomName)
         }
         var maxSize = getSharedPreferences().getString("max_noti", "15").toString().toInt()
 
         var ktNotificationData = notificationMap.getValue(nd.chatroomName)
+        ktNotificationData.isQuiet = ktChannelId.contains("quiet")
         ktNotificationData.addText(nd.sender, nd.text, maxSize)
 
         sendNotification(ktNotificationData)

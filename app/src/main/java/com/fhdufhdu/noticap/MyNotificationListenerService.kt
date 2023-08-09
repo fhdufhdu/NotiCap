@@ -23,19 +23,14 @@ class MyNotificationListenerService : NotificationListenerService() {
         super.onNotificationPosted(sbn)
 
         val ktNotificationCaptureManager = KtNotificationCaptureManagerV1.getInstance(this)
-        var isCancleNotification = false
-        var isEnableKakaoNotification = ktNotificationCaptureManager.getSharedPreferences().getBoolean("enable_kakao_notification", true)
+        var isEnableKtNotification = ktNotificationCaptureManager.getSharedPreferences().getBoolean("enable_kakao_notification", true)
+
+        if (sbn.packageName == "com.kakao.talk" && !isEnableKtNotification){
+            cancelNotification(sbn.key)
+        }
 
         try {
             ktNotificationCaptureManager.add(sbn)
-            isCancleNotification = true
-        } catch (error: KtNotificationCaptureManagerV1.NotKtNotification) {
-            if (error.type == KtNotificationCaptureManagerV1.NotKtNotification.NOT_HAVE_CONTENT) {
-                isCancleNotification = true
-            }
-        }
-        if (!isEnableKakaoNotification && isCancleNotification){
-            cancelNotification(sbn.key)
-        }
+        } catch (error: KtNotificationCaptureManagerV1.NotKtNotification) { }
     }
 }

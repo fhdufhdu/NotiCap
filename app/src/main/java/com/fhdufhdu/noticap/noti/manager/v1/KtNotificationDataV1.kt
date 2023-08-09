@@ -10,15 +10,14 @@ class KtNotificationDataV1 {
         var text: String = text
     }
 
-    val isQuiet: Boolean
+    var isQuiet: Boolean = false
     val id: Int
     val chatroomName: String
     val textList: ArrayDeque<KtNotificationText> = ArrayDeque()
 
-    constructor(id: Int, chatroomName: String, ktChannelId:String) {
+    constructor(id: Int, chatroomName: String) {
         this.id = id
         this.chatroomName = chatroomName
-        this.isQuiet = ktChannelId.contains("quiet")
     }
 
     fun addText(sender: String, text: String, maxSize: Int) {
