@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="알림 설정">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="version"
+            android:summary="알림을 어떻게 표시할 지 선택\noff: 채팅방 별 알림 모음\non: 채팅방 구분 없이 알림 모음"
+            android:title="표시 방법 선택" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="ongoing"
+            android:summary="비활성화시 알림 삭제 가능\n해당 설정과는 상관없이 카카오톡 알림을 읽으면 알림은 항상 지워집니다."
+            android:title="알림 유지" />
+        <EditTextPreference
+            android:title="노출할 알림의 최대 갯수"
+            android:summary="알림의 갯수를 얼마나 노출할 것인지 정합니다."
+            android:defaultValue="15"
+            android:dialogTitle="숫자를 입력하세요"
+            android:key="max_noti" />
+    </PreferenceCategory>
+</PreferenceScreen>

@@ -1,14 +1,10 @@
-package com.example.noticap;
+package com.example.noticap.v1;
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.util.Queue
-import java.util.Stack
-import kotlin.collections.ArrayList
+import kotlin.math.max
 
-class KakaoTalkNotiManager{
+class KakaoTalkNotiManager {
     private var notiIdList: Array<Boolean> = Array(100000) { false }
     var notiMap: HashMap<String, KakaoTalkNoti> = HashMap()
 
@@ -24,8 +20,7 @@ class KakaoTalkNotiManager{
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    public fun addNoti(chatroomName: String, sender: String, text: String){
+    public fun addNoti(chatroomName: String, sender: String, text: String, maxSize: Int) {
         if (notiMap[chatroomName] == null) {
             var id: Int = 0
             do {
@@ -36,18 +31,19 @@ class KakaoTalkNotiManager{
             notiMap[chatroomName] = KakaoTalkNoti(id, chatroomName)
         }
 
-        notiMap[chatroomName]!!.addText(sender, text)
+        notiMap[chatroomName]!!.addText(sender, text, maxSize)
     }
 
-    public fun getNotiId(chatroomName: String): Int?{
+    public fun getNotiId(chatroomName: String): Int? {
         if (notiMap[chatroomName] == null) {
             return null
         }
         return notiMap[chatroomName]!!.id
     }
-    public fun removeNoti(chatroomName: String){
+
+    public fun removeNoti(chatroomName: String) {
         if (notiMap[chatroomName] == null) {
-           return
+            return
         }
         notiMap[chatroomName]!!.textList.clear()
     }

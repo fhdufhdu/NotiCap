@@ -1,125 +1,103 @@
-package com.example.noticap
+package com.example.noticap.v2
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.Service
 import android.content.Context
-import android.content.ContextWrapper
-import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.drawable.Icon
 import android.os.Build
-import android.os.IBinder
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
-import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.graphics.drawable.IconCompat
+import com.example.noticap.R
+import com.gun0912.tedpermission.normal.TedPermission
 
 class MyNotiListenerService : NotificationListenerService() {
     private val TAG = "MyNotificationListenerService"
     private final val CHANNEL_ID = "NOTI_CAP"
+    val KEY_TEXT_REPLY = "key_text_reply"
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onNotificationRemoved(sbn: StatusBarNotification) {
         super.onNotificationRemoved(sbn)
 
         val packageName: String = sbn.packageName
         val extras = sbn.notification.extras
-        val extraSmallIcon: Icon = sbn.notification.smallIcon
         val extraTitle: String? = extras.getString(Notification.EXTRA_TITLE)
         val extraText: String? = extras.getString(Notification.EXTRA_TEXT)
         val extraSubText: String? = extras.getString(Notification.EXTRA_SUB_TEXT)
 
-        if (
-            (packageName == applicationContext.packageName || packageName == "com.kakao.talk")
-            && extraTitle!= null
-            && extraText!= null
-        ){
-            Log.d(TAG, packageName)
+        if ((packageName == applicationContext.packageName || packageName == "com.kakao.talk") && extraTitle != null && extraText != null) {
             var chatroomName: String = extraSubText ?: extraTitle
 
             var kakaoTalkNotiManager: KakaoTalkNotiManager = KakaoTalkNotiManager.getInstance()
-            kakaoTalkNotiManager.removeNoti(chatroomName)
 
-            var notiId:Int? = kakaoTalkNotiManager.getNotiId(chatroomName)
+            var removedIds: ArrayList<Int> = kakaoTalkNotiManager.removeNoti(chatroomName)
             var notificationManager = createNotificationChannel()
 
-            if (notiId != null){
-                notificationManager!!.cancel(notiId)
+            removedIds.forEach {
+                notificationManager!!.cancel(it)
             }
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         super.onNotificationPosted(sbn)
 
         val packageName: String = sbn.packageName
         val extras = sbn.notification.extras
-        val extraSmallIcon: Icon = sbn.notification.smallIcon
         val extraTitle: String? = extras.getString(Notification.EXTRA_TITLE)
         val extraText: String? = extras.getString(Notification.EXTRA_TEXT)
         val extraSubText: String? = extras.getString(Notification.EXTRA_SUB_TEXT)
 
-        if (packageName == "com.kakao.talk" && extraTitle!= null && extraText!= null) {
+        if (packageName == "com.kakao.talk" && extraTitle != null && extraText != null) {
             var chatroomName: String = extraSubText ?: extraTitle
             var sender: String = extraTitle
             var text: String = extraText
 
             var kakaoTalkNotiManager: KakaoTalkNotiManager = KakaoTalkNotiManager.getInstance()
-            kakaoTalkNotiManager.addNoti(chatroomName, sender, text)
-
-            sendNoti(extraSmallIcon)
+            var removedid = kakaoTalkNotiManager.addNoti(chatroomName, sender, text)
+            if (removedid != null) {
+                var notificationManager = createNotificationChannel()
+                notificationManager!!.cancel(removedid)
+            }
+            sendNoti()
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun sendNoti(smallIcon: Icon){
+    private fun sendNoti() {
         var notificationManager = createNotificationChannel()
         var kakaoTalkNotiManager: KakaoTalkNotiManager = KakaoTalkNotiManager.getInstance()
-        var notiMap: HashMap<String, KakaoTalkNoti> = kakaoTalkNotiManager.notiMap
+        var notiQueue: ArrayDeque<KakaoTalkNoti> = kakaoTalkNotiManager.notiQueue
 
-        notiMap.keys.forEach {
-            var kakaoTalkNoti = notiMap[it]!!
-
-            if (kakaoTalkNoti.textList.size < 1) return@forEach
-
-            var lastMsg = kakaoTalkNoti.textList.first()
-            var fullMsg = ""
-
-            kakaoTalkNoti.textList.forEach {subIt ->
-                fullMsg += if (kakaoTalkNoti.chatroomName == subIt.sender)
-                    "${subIt.time} ${subIt.text}\n"
-                else "${subIt.time} [${subIt.sender}] ${subIt.text}\n"
-            }
-            var builder = Notification.Builder(this, CHANNEL_ID)
+        var smallIcon = R.drawable.ic_noti
+        notiQueue.forEach {
+            var builder = NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(smallIcon)
-                .setContentTitle(lastMsg.sender)
-                .setContentText("${lastMsg.time} ${lastMsg.text}")
-                .setStyle(Notification.BigTextStyle()
-                    .bigText(fullMsg))
-                .setGroup(packageName)
+                .setContentTitle(it.sender).setContentText(it.text).setGroup(packageName)
+                .setWhen(it.time)
+                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setOngoing(true)
 
-            if (kakaoTalkNoti.chatroomName != lastMsg.sender){
-                builder = builder.setSubText(kakaoTalkNoti.chatroomName)
+            notificationManager?.notify(it.id, builder.build())
+            if (it.chatroomName != it.sender) {
+                builder = builder.setSubText(it.chatroomName)
             }
 
-            notificationManager?.notify(kakaoTalkNoti.id, builder.build())
+            notificationManager?.notify(it.id, builder.build())
         }
 
-        val summaryNotification = Notification.Builder(this, CHANNEL_ID)
-            .setContentTitle("새로운 카카오톡 알림")
-            .setContentText("자세히 보려면 알림을 확장하세요.")
-            .setSmallIcon(smallIcon)
-            .setGroup(packageName)
-            .setGroupSummary(true)
+        val summaryNotification =
+            NotificationCompat.Builder(this, CHANNEL_ID).setContentTitle("새로운 카카오톡 알림")
+                .setContentText("자세히 보려면 알림을 확장하세요.")
+                .setSmallIcon(smallIcon)
+                .setGroup(packageName)
+                .setGroupSummary(true)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setOngoing(true)
 
         notificationManager?.notify(1234, summaryNotification.build())
     }

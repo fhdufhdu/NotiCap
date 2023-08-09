@@ -1,29 +1,30 @@
-package com.example.noticap;
+package com.example.noticap.v1;
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.preference.PreferenceManager
+import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import kotlin.collections.ArrayList
 
 class KakaoTalkNoti {
     class KakaoTalkNotiText constructor(subTitle: String, text: String) {
-        @RequiresApi(Build.VERSION_CODES.O)
-        val time: String = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))
+        val time: String = SimpleDateFormat("HH:mm").format(System.currentTimeMillis())
         var sender: String = subTitle
         var text: String = text
     }
+
     val id: Int
     val chatroomName: String
     val textList: ArrayDeque<KakaoTalkNotiText> = ArrayDeque()
 
-    constructor(id: Int, chatroomName: String){
+    constructor(id: Int, chatroomName: String) {
         this.id = id
         this.chatroomName = chatroomName
     }
 
-    public fun addText(sender:String, text: String){
-        while(textList.size > 15){
+    public fun addText(sender: String, text: String, maxSize: Int) {
+        while (textList.size > 15) {
             textList.removeLast()
         }
         textList.addFirst(KakaoTalkNotiText(sender, text))
