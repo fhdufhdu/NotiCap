@@ -2,7 +2,7 @@ package com.fhdufhdu.noticap.noti.manager.v1;
 
 import java.text.SimpleDateFormat
 
-class KtNotificationDataV1 {
+class KtNotificationDataV1(val id: Int, val chatroomName: String, var isQuiet: Boolean) {
     class KtNotificationText constructor(subTitle: String, text: String) {
         val time: Long = System.currentTimeMillis()
         val timeString: String = SimpleDateFormat("HH:mm").format(time)
@@ -10,15 +10,7 @@ class KtNotificationDataV1 {
         var text: String = text
     }
 
-    var isQuiet: Boolean = false
-    val id: Int
-    val chatroomName: String
     val textList: ArrayDeque<KtNotificationText> = ArrayDeque()
-
-    constructor(id: Int, chatroomName: String) {
-        this.id = id
-        this.chatroomName = chatroomName
-    }
 
     fun addText(sender: String, text: String, maxSize: Int) {
         while (textList.size > maxSize) {

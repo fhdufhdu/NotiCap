@@ -9,7 +9,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.service.notification.StatusBarNotification
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.preference.PreferenceManager
@@ -33,6 +32,7 @@ class KtNotificationCaptureManagerV1 {
         fun getInstance(context: Context): KtNotificationCaptureManagerV1 {
             return instance ?: synchronized(this) {
                 instance ?: KtNotificationCaptureManagerV1().also {
+                    it.smallIcon = IconCompat.createWithResource(context, R.drawable.ic_noti)
                     it.context = context
                     instance = it
                 }
@@ -70,6 +70,7 @@ class KtNotificationCaptureManagerV1 {
         val importance = NotificationManager.IMPORTANCE_LOW
         val channel = NotificationChannel(QUIET_CHANNEL_ID, name, importance).apply {
             description = descriptionText
+            enableVibration(false)
         }
 
         val notificationManager: NotificationManager =
@@ -80,6 +81,7 @@ class KtNotificationCaptureManagerV1 {
     private fun bundleToNotificationDataForKakao(sbn: StatusBarNotification): NotificationData {
         val packageName: String = sbn.packageName
         val extras = sbn.notification.extras
+
 
         val title: String? = extras.getString(Notification.EXTRA_TITLE)
         val text: String? = extras.getString(Notification.EXTRA_TEXT)
@@ -114,15 +116,9 @@ class KtNotificationCaptureManagerV1 {
     }
 
     fun add(sbn: StatusBarNotification) {
-        var isEnableKtNotification =
-            getSharedPreferences().getBoolean("enable_kakao_notification", true)
-        smallIcon = if (isEnableKtNotification) {
-            IconCompat.createWithResource(context, R.drawable.ic_noti)
-        } else {
-            IconCompat.createFromIcon(context, sbn.notification.smallIcon)!!
-        }
         val nd = bundleToNotificationDataForKakao(sbn)
         val ktChannelId = sbn.notification.channelId
+        val isQuiet = ktChannelId.contains("quiet")
 
         if (notificationMap[nd.chatroomName] == null) {
             var id: Int = 0
@@ -132,19 +128,19 @@ class KtNotificationCaptureManagerV1 {
             } while (existId)
             notificationIdList[id] = true
             notificationMap[nd.chatroomName] =
-                KtNotificationDataV1(id, nd.chatroomName)
+                KtNotificationDataV1(id, nd.chatroomName, isQuiet)
         }
         var maxSize = getSharedPreferences().getString("max_noti", "15").toString().toInt()
 
         var ktNotificationData = notificationMap.getValue(nd.chatroomName)
-        ktNotificationData.isQuiet = ktChannelId.contains("quiet")
         ktNotificationData.addText(nd.sender, nd.text, maxSize)
+        ktNotificationData.isQuiet = isQuiet
 
         sendNotification(ktNotificationData)
     }
 
     fun remove(sbn: StatusBarNotification): Int? {
-        val chatroomName = bundleToNotificationDataForNotiCap(sbn)
+        var chatroomName: String = bundleToNotificationDataForNotiCap(sbn)
 
         var ktNotificationData = notificationMap[chatroomName]
         ktNotificationData?.textList?.clear()
@@ -166,10 +162,7 @@ class KtNotificationCaptureManagerV1 {
 
         val notificationManager: NotificationManager = getNotificationManager()
 
-        var isEnableKtNotification =
-            getSharedPreferences().getBoolean("enable_kakao_notification", true)
-
-        val channelId: String = if (ktNotificationData.isQuiet) QUIET_CHANNEL_ID else CHANNEL_ID
+        val channelId: String = QUIET_CHANNEL_ID
 
         if (ktNotificationData.textList.size < 1) return
 
@@ -200,7 +193,6 @@ class KtNotificationCaptureManagerV1 {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setOngoing(getSharedPreferences().getBoolean("ongoing", true))
             .setContentIntent(pendingIntent)
-            .setSilent(isEnableKtNotification)
             .setAutoCancel(true)
 
         notificationManager.notify(ktNotificationData.id, builder.build())
@@ -214,7 +206,6 @@ class KtNotificationCaptureManagerV1 {
             .setCategory(NotificationCompat.CATEGORY_MESSAGE)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setOngoing(getSharedPreferences().getBoolean("ongoing", true))
-            .setSilent(isEnableKtNotification)
 
         notificationManager.notify(1234, summaryNotification.build())
     }

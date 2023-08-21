@@ -3,10 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" tools:ignore="QueryAllPackagesPermission" />
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
 
     <queries>
-        <package android:name="com.kakao.talk"/>
+        <package android:name="com.kakao.talk" />
     </queries>
 
     <application
@@ -19,9 +21,17 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat"
         tools:targetApi="31">
-
+        <activity
+            android:name=".SettingActivity"
+            android:exported="false"
+            android:theme="@style/Theme.NotiCap.Main"/>
+        <activity
+            android:name=".NotificationActivity"
+            android:exported="true"
+            android:showOnLockScreen="true"
+            android:theme="@style/Theme.NotiCap.Noti" /> <!-- android:launchMode="singleInstance" -->
         <service
-            android:name=".MyNotificationListenerService"
+            android:name=".noti.manager.v2.MyNotificationListenerServiceV2"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
@@ -34,7 +44,8 @@
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.AppCompat">
+            android:showOnLockScreen="true"
+            android:theme="@style/Theme.NotiCap.Main">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
