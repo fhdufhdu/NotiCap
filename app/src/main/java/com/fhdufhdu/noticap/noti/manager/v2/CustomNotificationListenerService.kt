@@ -11,8 +11,10 @@ import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.graphics.drawable.IconCompat
+import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.fhdufhdu.noticap.ui.main.MainActivity
@@ -26,8 +28,11 @@ class CustomNotificationListenerService : NotificationListenerService() {
     }
 
     init {
-        val jsonSaverRequest = PeriodicWorkRequestBuilder<JsonSaver>(1, TimeUnit.MINUTES).build()
-        WorkManager.getInstance(this).enqueue(jsonSaverRequest)
+        val jsonSaverRequest = PeriodicWorkRequestBuilder<JsonSaver>(16, TimeUnit.MINUTES).build()
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "save_json",
+            ExistingPeriodicWorkPolicy.KEEP,
+            jsonSaverRequest)
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification) {

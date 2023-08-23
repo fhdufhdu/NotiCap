@@ -5,10 +5,13 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.preference.PreferenceManager
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.fhdufhdu.noticap.util.IconConverter
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.PriorityQueue
+import java.util.concurrent.TimeUnit
 
 class KakaoNotificationDataManager {
     private val usedId: Array<Boolean> = Array(100000) { false }

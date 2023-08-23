@@ -12,6 +12,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.WindowManager
@@ -20,12 +21,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.fhdufhdu.noticap.R
 import com.fhdufhdu.noticap.ui.setting.SettingActivity
 import com.fhdufhdu.noticap.noti.manager.v2.CustomNotificationListenerService
+import com.fhdufhdu.noticap.noti.manager.v2.JsonSaver
 import com.fhdufhdu.noticap.noti.manager.v2.KakaoNotificationDataManager
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.normal.TedPermission
+import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity() {
