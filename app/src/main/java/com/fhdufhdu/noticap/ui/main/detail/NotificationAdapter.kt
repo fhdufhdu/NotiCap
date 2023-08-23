@@ -1,8 +1,8 @@
-package com.fhdufhdu.noticap
+package com.fhdufhdu.noticap.ui.main.detail
 
 import android.annotation.SuppressLint
-import android.os.Build
-import android.util.DisplayMetrics
+import android.content.ComponentName
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,18 +10,18 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.annotation.RequiresApi
 import androidx.cardview.widget.CardView
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.marginBottom
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
-import com.fhdufhdu.noticap.noti.manager.v2.NotificationDataList
+import com.fhdufhdu.noticap.util.TimeCalculator
+import com.fhdufhdu.noticap.R
+import com.fhdufhdu.noticap.util.SizeManager
+import com.fhdufhdu.noticap.noti.manager.v2.KakaoNotificationDataList
+import com.fhdufhdu.noticap.util.SharedPreferenceManager
 import com.gun0912.tedpermission.provider.TedPermissionProvider.context
-import java.text.SimpleDateFormat
 
 
-class NotificationAdapter(private val notificationDataList: NotificationDataList) :
+class NotificationAdapter(private val kakaoNotificationDataList: KakaoNotificationDataList) :
     RecyclerView.Adapter<NotificationAdapter.ViewHolder>() {
 
 
@@ -52,22 +52,36 @@ class NotificationAdapter(private val notificationDataList: NotificationDataList
     }
 
     override fun getItemCount(): Int {
-        return notificationDataList.size
+        return kakaoNotificationDataList.size
     }
 
     @SuppressLint("SimpleDateFormat")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val notificationData = notificationDataList[position]
-        val pref = PreferenceManager.getDefaultSharedPreferences(holder.itemView.context)
+        val notificationData = kakaoNotificationDataList[position]
+        val context = holder.itemView.context
 
         holder.itemView.setOnClickListener {
-            notificationData.pendingIntent?.send()
+            if (SharedPreferenceManager.whetherToMoveToKakao(context)) {
+                if (notificationData.pendingIntent != null) {
+                    notificationData.pendingIntent.send()
+                } else {
+                    val compName =
+                        ComponentName("com.kakao.talk", "com.kakao.talk.activity.SplashActivity");
+                    val intent = Intent(Intent.ACTION_MAIN);
+                    intent.addCategory(Intent.CATEGORY_ALTERNATIVE);
+                    intent.component = compName;
+                    context.startActivity(intent)
+                }
+            }
         }
         holder.tvTitle.text = notificationData.title
         holder.tvSubText.text = notificationData.subText ?: " "
         holder.tvText.text = notificationData.text
 
-        holder.tvTime.text = CalculateTime.toString(pref, notificationData.time)
+        holder.tvTime.text = TimeCalculator.toString(
+            SharedPreferenceManager.getTimeFormatType(context),
+            notificationData.time
+        )
         holder.cvReadMark.visibility =
             if (notificationData.unread) CardView.VISIBLE else CardView.INVISIBLE
         holder.ivChatroom.setImageIcon(notificationData.personIcon)

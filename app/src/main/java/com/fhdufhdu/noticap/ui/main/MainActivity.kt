@@ -1,4 +1,4 @@
-package com.fhdufhdu.noticap
+package com.fhdufhdu.noticap.ui.main
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -8,26 +8,22 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.provider.Settings
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.WindowManager
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
-import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.fhdufhdu.noticap.noti.manager.v2.MyNotificationListenerServiceV2
-import com.fhdufhdu.noticap.noti.manager.v2.NotificationDataList
-import com.fhdufhdu.noticap.noti.manager.v2.NotificationDataManager
-import com.google.gson.GsonBuilder
+import com.fhdufhdu.noticap.R
+import com.fhdufhdu.noticap.ui.setting.SettingActivity
+import com.fhdufhdu.noticap.noti.manager.v2.CustomNotificationListenerService
+import com.fhdufhdu.noticap.noti.manager.v2.KakaoNotificationDataManager
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.normal.TedPermission
 
@@ -35,7 +31,7 @@ import com.gun0912.tedpermission.normal.TedPermission
 class MainActivity : AppCompatActivity() {
     lateinit var recyclerView: RecyclerView
     lateinit var tvEmptyNotice: TextView
-    var notificationAdapter: NotificationMainAdapter? = null
+    var notificationAdapter: ChatroomNotificationAdapter? = null
 
     @SuppressLint("SuspiciousIndentation")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,7 +40,7 @@ class MainActivity : AppCompatActivity() {
 
         supportActionBar?.title = "채팅방 목록"
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (this.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED)
                 TedPermission.create()
                     .setPermissionListener(object : PermissionListener {
@@ -73,26 +69,19 @@ class MainActivity : AppCompatActivity() {
         val screenOffReceiver = ScreenOffReceiver()
         val filter = IntentFilter()
         filter.addAction(Intent.ACTION_SCREEN_OFF)
-        filter.addAction(MyNotificationListenerServiceV2.ACTION_NAME)
+        filter.addAction(CustomNotificationListenerService.ACTION_NAME)
         registerReceiver(screenOffReceiver, filter)
 
-        val notificationDataManager = NotificationDataManager.getInstance()
-        notificationDataManager.loadJson(this)
+        val kakaoNotificationDataManager = KakaoNotificationDataManager.getInstance()
+        kakaoNotificationDataManager.loadJson(this)
 
         tvEmptyNotice = findViewById(R.id.tv_emtpy_notice)
-        if (notificationDataManager.notificationMap.size == 0){
+        if (kakaoNotificationDataManager.notificationMap.size == 0) {
             tvEmptyNotice.visibility = TextView.VISIBLE
         }
         recyclerView = findViewById(R.id.rv_main_notification)
         recyclerView.layoutManager = LinearLayoutManager(this)
         setAdapter()
-
-
-//        supportFragmentManager.beginTransaction()
-//            .replace(R.id.fragment_container, SettingFragment(), "setting_fragment")
-//            .commit()
-
-
     }
 
     override fun onResume() {
@@ -107,7 +96,7 @@ class MainActivity : AppCompatActivity() {
             return notificationManager.isNotificationListenerAccessGranted(
                 ComponentName(
                     application,
-                    MyNotificationListenerServiceV2::class.java
+                    CustomNotificationListenerService::class.java
                 )
             )
         } else {
@@ -116,27 +105,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setAdapter(){
-        notificationAdapter = NotificationMainAdapter()
+    private fun setAdapter() {
+        notificationAdapter = ChatroomNotificationAdapter()
         recyclerView.adapter = notificationAdapter
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    private fun updateAdapter(){
-        notificationAdapter?.update(this)
-    }
-
-    inner class ScreenOffReceiver: BroadcastReceiver(){
-        override fun onReceive(context: Context?, intent: Intent?) {
-            if(Intent.ACTION_SCREEN_OFF == intent?.action){
-                finish()
-            }
-            else if(MyNotificationListenerServiceV2.ACTION_NAME == intent?.action){
-                if (notificationAdapter == null) setAdapter()
-                else updateAdapter()
-                tvEmptyNotice.visibility = TextView.INVISIBLE
-            }
-        }
+    private fun updateAdapter() {
+        notificationAdapter?.update()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -145,7 +121,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when(item.itemId){
+        return when (item.itemId) {
             R.id.setting -> {
                 val intent = Intent(this, SettingActivity::class.java)
                 startActivity(intent)
@@ -154,6 +130,18 @@ class MainActivity : AppCompatActivity() {
 
             else -> {
                 super.onOptionsItemSelected(item)
+            }
+        }
+    }
+
+    inner class ScreenOffReceiver : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (Intent.ACTION_SCREEN_OFF == intent?.action) {
+                finish()
+            } else if (CustomNotificationListenerService.ACTION_NAME == intent?.action) {
+                if (notificationAdapter == null) setAdapter()
+                else updateAdapter()
+                tvEmptyNotice.visibility = TextView.INVISIBLE
             }
         }
     }

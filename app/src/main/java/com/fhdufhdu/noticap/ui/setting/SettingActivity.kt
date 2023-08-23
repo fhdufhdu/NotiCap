@@ -1,8 +1,8 @@
-package com.fhdufhdu.noticap
+package com.fhdufhdu.noticap.ui.setting
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.preference.ListPreference
+import com.fhdufhdu.noticap.R
 
 class SettingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

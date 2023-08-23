@@ -1,16 +1,15 @@
-package com.fhdufhdu.noticap
+package com.fhdufhdu.noticap.util
 
 import android.annotation.SuppressLint
 import android.content.SharedPreferences
-import androidx.preference.PreferenceManager
 import java.text.SimpleDateFormat
 
-class CalculateTime {
+class TimeCalculator {
     companion object{
         @SuppressLint("SimpleDateFormat")
-        fun toString(pref: SharedPreferences, millis: Long): String{
-            when(pref.getString("representation_time", "2")){
-                "2" -> {
+        fun toString(timeFormatType: Int, millis: Long): String{
+            when(timeFormatType){
+                SharedPreferenceManager.TIME_FORMAT_ABSOLUTE -> {
                     return SimpleDateFormat("HH:mm").format(millis)
                 }
                 else -> {

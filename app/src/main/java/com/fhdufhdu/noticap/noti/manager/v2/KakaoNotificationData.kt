@@ -2,10 +2,8 @@ package com.fhdufhdu.noticap.noti.manager.v2;
 
 import android.app.PendingIntent
 import android.graphics.drawable.Icon
-import android.os.Parcel
-import android.os.Parcelable
 
-class NotificationData(
+class KakaoNotificationData(
     val title: String,
     val text: String,
     val subText: String?,

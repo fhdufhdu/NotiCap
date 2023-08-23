@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="array_representation_time">
+    <string-array name="array_time_format">
         <item>상대적인 시간\n(ex. 1초 전, 2분 전, 1시간 전)</item>
         <item>절대적인 시간\n(ex. 12:20)</item>
     </string-array>
-    <string-array name="array_representation_time_value">
+    <string-array name="array_time_format_value">
         <item>1</item>
         <item>2</item>
     </string-array>

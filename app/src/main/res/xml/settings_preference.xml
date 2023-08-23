@@ -6,19 +6,16 @@
         app:iconSpaceReserved="false">
         <ListPreference
             app:iconSpaceReserved="false"
-            android:entries="@array/array_representation_time"
-            android:entryValues="@array/array_representation_time_value"
-            android:key="representation_time"
+            android:entries="@array/array_time_format"
+            android:entryValues="@array/array_time_format_value"
+            android:key="TIME_FORMAT"
             android:title="시간 표시 방법"
             android:summary="시간을 어떻게 표시할 지 선택합니다."
-            android:defaultValue="2">
-        </ListPreference>
-<!--        <EditTextPreference-->
-<!--            android:defaultValue="15"-->
-<!--            android:dialogTitle="숫자를 입력하세요"-->
-<!--            android:key="max_noti"-->
-<!--            android:summary="알림의 갯수를 얼마나 노출할 것인지 정합니다."-->
-<!--            android:title="노출할 알림의 최대 갯수"-->
-<!--            app:iconSpaceReserved="false" />-->
+            android:defaultValue="2"/>
+        <SwitchPreference
+            app:iconSpaceReserved="false"
+            android:key="TO_MOVE_TO_KAKAO"
+            android:title="알림 내역 터치 시 해당 채팅방으로 이동"
+            android:defaultValue="true"/>
     </PreferenceCategory>
 </PreferenceScreen>

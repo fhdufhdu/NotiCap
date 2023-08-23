@@ -1,4 +1,4 @@
-package com.fhdufhdu.noticap
+package com.fhdufhdu.noticap.util
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -10,7 +10,7 @@ import androidx.core.graphics.drawable.toIcon
 import java.io.ByteArrayOutputStream
 
 
-class IconBitmapConverter {
+class IconConverter {
 
     companion object{
         fun stringToBitmap(encodedString: String?): Bitmap? {

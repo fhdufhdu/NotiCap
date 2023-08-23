@@ -1,9 +1,8 @@
-package com.fhdufhdu.noticap
+package com.fhdufhdu.noticap.ui.setting
 
 import android.os.Bundle
-import android.text.InputType
-import androidx.preference.EditTextPreference
 import androidx.preference.PreferenceFragmentCompat
+import com.fhdufhdu.noticap.R
 
 
 class SettingFragment: PreferenceFragmentCompat() {

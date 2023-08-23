@@ -1,4 +1,4 @@
-package com.fhdufhdu.noticap
+package com.fhdufhdu.noticap.util
 
 import android.util.DisplayMetrics
 

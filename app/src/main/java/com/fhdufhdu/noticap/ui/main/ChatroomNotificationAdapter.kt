@@ -1,10 +1,8 @@
-package com.fhdufhdu.noticap
+package com.fhdufhdu.noticap.ui.main
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
-import android.content.SharedPreferences
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,28 +10,30 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.cardview.widget.CardView
-import androidx.core.graphics.drawable.toBitmap
-import androidx.preference.Preference
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
-import com.fhdufhdu.noticap.noti.manager.v2.NotificationDataList
-import com.fhdufhdu.noticap.noti.manager.v2.NotificationDataManager
+import com.fhdufhdu.noticap.util.TimeCalculator
+import com.fhdufhdu.noticap.ui.main.detail.DetailActivity
+import com.fhdufhdu.noticap.R
+import com.fhdufhdu.noticap.util.SizeManager
+import com.fhdufhdu.noticap.noti.manager.v2.KakaoNotificationDataList
+import com.fhdufhdu.noticap.noti.manager.v2.KakaoNotificationDataManager
+import com.fhdufhdu.noticap.util.SharedPreferenceManager
 import com.gun0912.tedpermission.provider.TedPermissionProvider
 
 
-class NotificationMainAdapter :
-    RecyclerView.Adapter<NotificationMainAdapter.ViewHolder> {
+class ChatroomNotificationAdapter :
+    RecyclerView.Adapter<ChatroomNotificationAdapter.ViewHolder> {
 
-    private val notificationMap: HashMap<String, NotificationDataList>
-    private var notificationSortedDataList: ArrayList<NotificationDataList>
+    private val notificationMap: HashMap<String, KakaoNotificationDataList>
+    private var notificationSortedDataList: ArrayList<KakaoNotificationDataList>
 
     constructor() {
-        val notificationDataManager = NotificationDataManager.getInstance()
-        this.notificationMap = notificationDataManager.notificationMap
-        this.notificationSortedDataList = notificationDataManager.getSortedDataLists()
+        val kakaoNotificationDataManager = KakaoNotificationDataManager.getInstance()
+        this.notificationMap = kakaoNotificationDataManager.notificationMap
+        this.notificationSortedDataList = kakaoNotificationDataManager.getSortedDataLists()
     }
 
 
@@ -68,13 +68,12 @@ class NotificationMainAdapter :
 
     @SuppressLint("SimpleDateFormat")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val notificationDataManager = NotificationDataManager.getInstance()
+        val kakaoNotificationDataManager = KakaoNotificationDataManager.getInstance()
         val notificationData = notificationSortedDataList[position][0]
-        val pref = PreferenceManager.getDefaultSharedPreferences(holder.itemView.context)
+        val context = holder.itemView.context
 
         holder.itemView.setOnClickListener {
-            val context = holder.itemView.context
-            var intent = Intent(context, NotificationActivity::class.java)
+            val intent = Intent(context, DetailActivity::class.java)
             intent.putExtra("CHATROOM_NAME", notificationData.getChatroomName())
             context.startActivity(intent)
         }
@@ -83,7 +82,7 @@ class NotificationMainAdapter :
             AlertDialog.Builder(it.context)
                 .setMessage("채팅방을 삭제하시겠습니까?")
                 .setPositiveButton("확인") { _, _ ->
-                    notificationDataManager.deleteChatroom(
+                    kakaoNotificationDataManager.deleteChatroom(
                         it.context,
                         notificationData.getChatroomName()
                     )
@@ -96,9 +95,15 @@ class NotificationMainAdapter :
         holder.tvSubText.text = notificationData.subText ?: " "
         holder.tvText.text = notificationData.text
 
-        val unreadCount = notificationDataManager.getUnreadCount(notificationData.getChatroomName())
+        val unreadCount =
+            kakaoNotificationDataManager.getUnreadCount(notificationData.getChatroomName())
         val unreadStr = if (unreadCount > 0) "($unreadCount)" else ""
-        "${CalculateTime.toString(pref, notificationData.time)} $unreadStr".also { holder.tvTime.text = it }
+        "${
+            TimeCalculator.toString(
+                SharedPreferenceManager.getTimeFormatType(context),
+                notificationData.time
+            )
+        } $unreadStr".also { holder.tvTime.text = it }
         holder.cvReadMark.visibility =
             if (notificationData.unread) CardView.VISIBLE else CardView.INVISIBLE
         holder.ivChatroom.setImageIcon(notificationData.personIcon)
@@ -119,10 +124,9 @@ class NotificationMainAdapter :
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun update(context: Context) {
-        val notificationDataManager = NotificationDataManager.getInstance()
-        this.notificationSortedDataList = notificationDataManager.getSortedDataLists()
-        notificationDataManager.saveJson(context)
+    fun update() {
+        val kakaoNotificationDataManager = KakaoNotificationDataManager.getInstance()
+        this.notificationSortedDataList = kakaoNotificationDataManager.getSortedDataLists()
         notifyDataSetChanged()
     }
 }

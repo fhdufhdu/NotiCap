@@ -11,21 +11,23 @@ import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.graphics.drawable.IconCompat
-import androidx.preference.PreferenceManager
-import com.fhdufhdu.noticap.MainActivity
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import com.fhdufhdu.noticap.ui.main.MainActivity
 import com.fhdufhdu.noticap.R
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import kotlin.concurrent.fixedRateTimer
+import java.util.concurrent.TimeUnit
 
-class MyNotificationListenerServiceV2 : NotificationListenerService() {
+class CustomNotificationListenerService : NotificationListenerService() {
     companion object {
         val CHANNEL_ID = "CAPTURE"
         val ACTION_NAME = "UPDATE_NOTI_CAP"
-        val DATA_NAME = "NOTI_DATA"
+    }
+
+    init {
+        val jsonSaverRequest = PeriodicWorkRequestBuilder<JsonSaver>(1, TimeUnit.MINUTES).build()
+        WorkManager.getInstance(this).enqueue(jsonSaverRequest)
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification) {
@@ -39,9 +41,9 @@ class MyNotificationListenerServiceV2 : NotificationListenerService() {
 
             val chatroomName = notificationInfo.first
 
-            val notificationDataManager = NotificationDataManager.getInstance()
+            val kakaoNotificationDataManager = KakaoNotificationDataManager.getInstance()
 
-            notificationDataManager.read(chatroomName)
+            kakaoNotificationDataManager.read(chatroomName)
 
             var broadcastIntent = Intent()
             broadcastIntent.action = ACTION_NAME
@@ -58,7 +60,7 @@ class MyNotificationListenerServiceV2 : NotificationListenerService() {
             )
 
             val notificationManager = createNotificationChannel()
-            val unreadChatroomName = notificationDataManager.getUnreadChatroomNames()
+            val unreadChatroomName = kakaoNotificationDataManager.getUnreadChatroomNames()
             if (unreadChatroomName.size == 0) {
                 notificationManager.cancel(1026)
             } else {
@@ -66,7 +68,7 @@ class MyNotificationListenerServiceV2 : NotificationListenerService() {
                     .setSmallIcon(IconCompat.createWithResource(this, R.drawable.ic_notification))
                     .setContentTitle("새로운 카카오톡 알림")
                     .setContentText(
-                        notificationDataManager.getUnreadChatroomNames().joinToString(", ")
+                        kakaoNotificationDataManager.getUnreadChatroomNames().joinToString(", ")
                     )
                     .setCategory(NotificationCompat.CATEGORY_MESSAGE)
                     .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -91,9 +93,9 @@ class MyNotificationListenerServiceV2 : NotificationListenerService() {
             val chatroomName = notificationInfo.first
             val notificationData = notificationInfo.second
 
-            val notificationDataManager = NotificationDataManager.getInstance()
+            val kakaoNotificationDataManager = KakaoNotificationDataManager.getInstance()
 
-            notificationDataManager.add(chatroomName, notificationData)
+            kakaoNotificationDataManager.add(chatroomName, notificationData)
 
             var broadcastIntent = Intent()
             broadcastIntent.action = ACTION_NAME
@@ -113,21 +115,19 @@ class MyNotificationListenerServiceV2 : NotificationListenerService() {
             val builder = NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(IconCompat.createWithResource(this, R.drawable.ic_notification))
                 .setContentTitle("새로운 카카오톡 알림")
-                .setContentText(notificationDataManager.getUnreadChatroomNames().joinToString(", "))
+                .setContentText(kakaoNotificationDataManager.getUnreadChatroomNames().joinToString(", "))
                 .setCategory(NotificationCompat.CATEGORY_MESSAGE)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setContentIntent(pendingIntent)
 //                .setOngoing(true)
             notificationManager.notify(1026, builder.build())
-
-            notificationDataManager.saveJson(this)
         }
     }
 
     private fun getNotificationInfo(
         notification: Notification,
         extras: Bundle
-    ): Pair<String, NotificationData>? {
+    ): Pair<String, KakaoNotificationData>? {
         val title = extras.getString(Notification.EXTRA_TITLE) ?: return null
         val text = extras.getString(Notification.EXTRA_TEXT) ?: return null
         val subText = extras.getString(Notification.EXTRA_SUB_TEXT)
@@ -141,7 +141,7 @@ class MyNotificationListenerServiceV2 : NotificationListenerService() {
         val pendingIntent = notification.contentIntent
 
         val chatroomName = subText ?: title
-        val notificationData = NotificationData(
+        val kakaoNotificationData = KakaoNotificationData(
             title,
             text,
             subText,
@@ -150,7 +150,7 @@ class MyNotificationListenerServiceV2 : NotificationListenerService() {
             pendingIntent
         )
 
-        return Pair(chatroomName, notificationData)
+        return Pair(chatroomName, kakaoNotificationData)
     }
 
     private fun createNotificationChannel(): NotificationManager {

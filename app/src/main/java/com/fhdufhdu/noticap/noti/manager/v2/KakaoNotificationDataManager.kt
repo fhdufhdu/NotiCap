@@ -1,38 +1,25 @@
 package com.fhdufhdu.noticap.noti.manager.v2;
 
 import android.annotation.SuppressLint
-import android.app.Notification
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
-import android.os.Parcel
-import android.os.Parcelable
 import android.util.Log
 import androidx.preference.PreferenceManager
-import com.fhdufhdu.noticap.IconBitmapConverter
-import com.fhdufhdu.noticap.noti.manager.v1.KtNotificationCaptureManagerV1
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonObject
+import com.fhdufhdu.noticap.util.IconConverter
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.Serializable
 import java.util.PriorityQueue
-import java.util.SortedMap
-import java.util.SortedSet
-import java.util.TreeMap
-import java.util.TreeSet
-import kotlin.random.Random
 
-class NotificationDataManager {
+class KakaoNotificationDataManager {
     private val usedId: Array<Boolean> = Array(100000) { false }
-    lateinit var notificationMap: HashMap<String, NotificationDataList>
+    lateinit var notificationMap: HashMap<String, KakaoNotificationDataList>
     val NOTI_JSON = "NOTI_JSON"
 
     companion object {
-        private var instance: NotificationDataManager? = null
-        fun getInstance(): NotificationDataManager {
+        private var instance: KakaoNotificationDataManager? = null
+        fun getInstance(): KakaoNotificationDataManager {
             return instance ?: synchronized(this) {
-                instance ?: NotificationDataManager().also {
+                instance ?: KakaoNotificationDataManager().also {
                     it.notificationMap = HashMap()
                     instance = it
                 }
@@ -40,7 +27,7 @@ class NotificationDataManager {
         }
     }
 
-    fun add(chatroomName: String, notificationData: NotificationData) {
+    fun add(chatroomName: String, kakaoNotificationData: KakaoNotificationData) {
         if (!notificationMap.containsKey(chatroomName)) {
             var id = 0
             do {
@@ -48,10 +35,10 @@ class NotificationDataManager {
                 var existId = usedId[id]
             } while (existId)
             usedId[id] = true
-            val notificationDataList = NotificationDataList(id)
-            notificationMap[chatroomName] = notificationDataList
+            val kakaoNotificationDataList = KakaoNotificationDataList(id)
+            notificationMap[chatroomName] = kakaoNotificationDataList
         }
-        notificationMap[chatroomName]!!.addFirst(notificationData)
+        notificationMap[chatroomName]!!.addFirst(kakaoNotificationData)
     }
 
     fun read(chatroomName: String) {
@@ -86,7 +73,7 @@ class NotificationDataManager {
         return result
     }
 
-    fun get(chatroomName: String, position: Int): NotificationData? {
+    fun get(chatroomName: String, position: Int): KakaoNotificationData? {
         if (notificationMap.containsKey(chatroomName)) {
             val notificationDataList = notificationMap[chatroomName]!!
             return notificationDataList[position]
@@ -95,7 +82,7 @@ class NotificationDataManager {
         return null
     }
 
-    fun getSortedDataLists(): ArrayList<NotificationDataList> {
+    fun getSortedDataLists(): ArrayList<KakaoNotificationDataList> {
         return ArrayList(notificationMap.values.sortedWith { a, b ->
             (b.lastNotificationTime - a.lastNotificationTime).toInt()
         })
@@ -110,7 +97,7 @@ class NotificationDataManager {
     fun deleteChatroom(context: Context, chatroomName: String) {
         notificationMap.remove(chatroomName)
         var broadcastIntent = Intent()
-        broadcastIntent.action = MyNotificationListenerServiceV2.ACTION_NAME
+        broadcastIntent.action = CustomNotificationListenerService.ACTION_NAME
         context.sendBroadcast(broadcastIntent)
     }
 
@@ -135,7 +122,7 @@ class NotificationDataManager {
                 if (iit.personIcon != null) {
                     jsonData.put(
                         "personIcon",
-                        IconBitmapConverter.iconToString(iit.personIcon, context)
+                        IconConverter.iconToString(iit.personIcon, context)
                     )
                 }
                 jsonData.put("time", iit.time)
@@ -166,26 +153,26 @@ class NotificationDataManager {
                 val jsonListData = jsonMap.getJSONObject(it)
                 val jsonList = jsonListData.getJSONArray("list")
 
-                val notificationDataList = NotificationDataList(jsonListData.getInt("id"))
-                notificationDataList.lastNotificationTime = jsonListData.getLong("lastNotificationTime")
-                notificationDataList.unreadCount = jsonListData.getInt("unreadCount")
+                val kakaoNotificationDataList = KakaoNotificationDataList(jsonListData.getInt("id"))
+                kakaoNotificationDataList.lastNotificationTime = jsonListData.getLong("lastNotificationTime")
+                kakaoNotificationDataList.unreadCount = jsonListData.getInt("unreadCount")
 
                 for(idx in 0 until jsonList.length()){
                     val jsonData = jsonList.getJSONObject(idx)
-                    val notificationData = NotificationData(
+                    val kakaoNotificationData = KakaoNotificationData(
                         jsonData.getString("title"),
                         jsonData.getString("text"),
                         jsonData.optString("subText", null),
-                        IconBitmapConverter.stringToIcon(jsonData.optString("personIcon", null)),
+                        IconConverter.stringToIcon(jsonData.optString("personIcon", null)),
                         jsonData.getLong("time"),
                         null
                     )
-                    notificationData.unread = jsonData.getBoolean("unread")
-                    notificationData.doRunAnimation = jsonData.getBoolean("doRunAnimation")
-                    notificationDataList.add(notificationData)
+                    kakaoNotificationData.unread = jsonData.getBoolean("unread")
+                    kakaoNotificationData.doRunAnimation = jsonData.getBoolean("doRunAnimation")
+                    kakaoNotificationDataList.add(kakaoNotificationData)
                 }
 
-                notificationMap[it] = notificationDataList
+                notificationMap[it] = kakaoNotificationDataList
             }
         }
     }

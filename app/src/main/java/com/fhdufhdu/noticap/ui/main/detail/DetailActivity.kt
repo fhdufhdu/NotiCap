@@ -1,7 +1,6 @@
-package com.fhdufhdu.noticap
+package com.fhdufhdu.noticap.ui.main.detail
 
 import android.annotation.SuppressLint
-import android.app.KeyguardManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -9,16 +8,15 @@ import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.fhdufhdu.noticap.noti.manager.v2.MyNotificationListenerServiceV2
-import com.fhdufhdu.noticap.noti.manager.v2.NotificationDataList
-import com.fhdufhdu.noticap.noti.manager.v2.NotificationDataManager
+import com.fhdufhdu.noticap.R
+import com.fhdufhdu.noticap.noti.manager.v2.CustomNotificationListenerService
+import com.fhdufhdu.noticap.noti.manager.v2.KakaoNotificationDataManager
 
 
-class NotificationActivity : AppCompatActivity() {
+class DetailActivity : AppCompatActivity() {
     var chatroomName: String = ""
     lateinit var recyclerView: RecyclerView
     var notificationAdapter: NotificationAdapter? = null
@@ -39,7 +37,7 @@ class NotificationActivity : AppCompatActivity() {
         val screenOffReceiver = ScreenOffReceiver()
         val filter = IntentFilter()
         filter.addAction(Intent.ACTION_SCREEN_OFF)
-        filter.addAction(MyNotificationListenerServiceV2.ACTION_NAME)
+        filter.addAction(CustomNotificationListenerService.ACTION_NAME)
         registerReceiver(screenOffReceiver, filter)
 
         chatroomName = intent.getStringExtra("CHATROOM_NAME")?:return
@@ -66,8 +64,8 @@ class NotificationActivity : AppCompatActivity() {
 //    }
 
     private fun setAdapter(){
-        val notificationDataManager = NotificationDataManager.getInstance()
-        val notificationDataList = notificationDataManager.notificationMap[chatroomName]
+        val kakaoNotificationDataManager = KakaoNotificationDataManager.getInstance()
+        val notificationDataList = kakaoNotificationDataManager.notificationMap[chatroomName]
 
         if (notificationDataList != null){
             notificationAdapter = NotificationAdapter(notificationDataList)
@@ -85,7 +83,7 @@ class NotificationActivity : AppCompatActivity() {
             if(Intent.ACTION_SCREEN_OFF == intent?.action){
                 finish()
             }
-            else if(MyNotificationListenerServiceV2.ACTION_NAME == intent?.action){
+            else if(CustomNotificationListenerService.ACTION_NAME == intent?.action){
                 if (notificationAdapter == null) setAdapter()
                 else updateAdapter()
             }
