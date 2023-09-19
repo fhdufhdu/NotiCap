@@ -5,24 +5,31 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.fhdufhdu.noticap.R
+import com.fhdufhdu.noticap.databinding.ActivityNotificationBinding
 import com.fhdufhdu.noticap.noti.manager.v2.CustomNotificationListenerService
-import com.fhdufhdu.noticap.noti.manager.v2.KakaoNotificationDataManager
+import com.fhdufhdu.noticap.noti.manager.v3.KakaoNotificationDatabase
+import com.fhdufhdu.noticap.ui.main.ChatroomNotificationAdapter
 
 
 class DetailActivity : AppCompatActivity() {
-    var chatroomName: String = ""
-    lateinit var recyclerView: RecyclerView
-    var notificationAdapter: NotificationAdapter? = null
+    private lateinit var binding: ActivityNotificationBinding
+    private var chatroomName: String = ""
+    private lateinit var notificationAdapter: NotificationAdapter
+    private lateinit var prefs: SharedPreferences
+    private lateinit var prefsListener:SharedPreferences.OnSharedPreferenceChangeListener
+    @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_notification)
+        binding = ActivityNotificationBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
@@ -40,42 +47,29 @@ class DetailActivity : AppCompatActivity() {
         filter.addAction(CustomNotificationListenerService.ACTION_NAME)
         registerReceiver(screenOffReceiver, filter)
 
+        val dao = KakaoNotificationDatabase.getInstance(applicationContext).kakaoNotificationDao()
+
         chatroomName = intent.getStringExtra("CHATROOM_NAME")?:return
         intent.extras?.clear()
 
-        recyclerView = findViewById<RecyclerView>(R.id.rv_notification)
-        recyclerView.layoutManager = LinearLayoutManager(this)
+        binding.rvNotification.layoutManager = LinearLayoutManager(this)
+        notificationAdapter = NotificationAdapter(applicationContext)
+        binding.rvNotification.adapter = notificationAdapter
 
-        setAdapter()
+        dao.selectMany(chatroomName).observe(this){
+            notificationAdapter.update(it)
+        }
+
+        prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        prefsListener = SharedPreferences.OnSharedPreferenceChangeListener{ prefs: SharedPreferences, key: String ->
+            notificationAdapter.notifyDataSetChanged()
+        }
 
     }
 
     override fun onResume() {
         super.onResume()
-        updateAdapter()
-    }
-
-//    override fun onPause() {
-//        super.onPause()
-//        if (chatroomName != ""){
-//            val notificationDataManager = NotificationDataManager.getInstance()
-//            notificationDataManager.read(chatroomName)
-//        }
-//    }
-
-    private fun setAdapter(){
-        val kakaoNotificationDataManager = KakaoNotificationDataManager.getInstance()
-        val notificationDataList = kakaoNotificationDataManager.notificationMap[chatroomName]
-
-        if (notificationDataList != null){
-            notificationAdapter = NotificationAdapter(notificationDataList)
-            recyclerView.adapter = notificationAdapter
-        }
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    private fun updateAdapter(){
-        notificationAdapter?.notifyDataSetChanged()
+        prefs.registerOnSharedPreferenceChangeListener(prefsListener)
     }
 
     inner class ScreenOffReceiver: BroadcastReceiver(){
@@ -83,10 +77,10 @@ class DetailActivity : AppCompatActivity() {
             if(Intent.ACTION_SCREEN_OFF == intent?.action){
                 finish()
             }
-            else if(CustomNotificationListenerService.ACTION_NAME == intent?.action){
-                if (notificationAdapter == null) setAdapter()
-                else updateAdapter()
-            }
+//            else if(CustomNotificationListenerService.ACTION_NAME == intent?.action){
+//                if (notificationAdapter == null) setAdapter()
+//                else updateAdapter()
+//            }
         }
     }
 

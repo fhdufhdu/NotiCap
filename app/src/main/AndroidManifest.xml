@@ -28,13 +28,13 @@
             android:theme="@style/Theme.NotiCap.Main" />
         <activity
             android:name=".ui.main.detail.DetailActivity"
-            android:exported="true"
+            android:exported="false"
             android:showOnLockScreen="true"
             android:theme="@style/Theme.NotiCap.Noti" /> <!-- android:launchMode="singleInstance" -->
         <service
-            android:name=".noti.manager.v2.CustomNotificationListenerService"
+            android:name=".noti.manager.v3.CustomNotificationListenerService"
             android:enabled="true"
-            android:exported="true"
+            android:exported="false"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>
                 <action android:name="android.service.notification.NotificationListenerService" />

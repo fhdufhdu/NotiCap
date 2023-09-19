@@ -8,6 +8,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -19,42 +20,38 @@ import android.view.WindowManager
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
 import com.fhdufhdu.noticap.R
+import com.fhdufhdu.noticap.databinding.ActivityMainBinding
 import com.fhdufhdu.noticap.ui.setting.SettingActivity
-import com.fhdufhdu.noticap.noti.manager.v2.CustomNotificationListenerService
-import com.fhdufhdu.noticap.noti.manager.v2.JsonSaver
-import com.fhdufhdu.noticap.noti.manager.v2.KakaoNotificationDataManager
+import com.fhdufhdu.noticap.noti.manager.v3.CustomNotificationListenerService
+import com.fhdufhdu.noticap.noti.manager.v3.KakaoNotificationDatabase
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.normal.TedPermission
-import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity() {
-    lateinit var recyclerView: RecyclerView
-    lateinit var tvEmptyNotice: TextView
-    var notificationAdapter: ChatroomNotificationAdapter? = null
+    private lateinit var binding: ActivityMainBinding
+    private lateinit var notificationAdapter: ChatroomNotificationAdapter
+    private lateinit var prefs: SharedPreferences
+    private lateinit var prefsListener:SharedPreferences.OnSharedPreferenceChangeListener
 
-    @SuppressLint("SuspiciousIndentation")
+    @SuppressLint("SuspiciousIndentation", "NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         supportActionBar?.title = "채팅방 목록"
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (this.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED)
-                TedPermission.create()
-                    .setPermissionListener(object : PermissionListener {
-                        override fun onPermissionGranted() {}
-                        override fun onPermissionDenied(deniedPermissions: MutableList<String>?) {}
-                    })
-                    .setDeniedMessage("알림 권한을 허용하지 않으시면 앱을 사용하실 수 없습니다.")
-                    .setPermissions(Manifest.permission.POST_NOTIFICATIONS)
-                    .check()
+            if (this.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) TedPermission.create()
+                .setPermissionListener(object : PermissionListener {
+                    override fun onPermissionGranted() {}
+                    override fun onPermissionDenied(deniedPermissions: MutableList<String>?) {}
+                }).setDeniedMessage("알림 권한을 허용하지 않으시면 앱을 사용하실 수 없습니다.")
+                .setPermissions(Manifest.permission.POST_NOTIFICATIONS).check()
 
         }
         if (!isNotiPermissionGranted()) {
@@ -65,9 +62,7 @@ class MainActivity : AppCompatActivity() {
             setShowWhenLocked(true)
         } else {
             window.addFlags(
-                WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
-                        WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                        WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+                WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
             )
         }
 
@@ -77,21 +72,28 @@ class MainActivity : AppCompatActivity() {
         filter.addAction(CustomNotificationListenerService.ACTION_NAME)
         registerReceiver(screenOffReceiver, filter)
 
-        val kakaoNotificationDataManager = KakaoNotificationDataManager.getInstance()
-        kakaoNotificationDataManager.loadJson(this)
+        val dao = KakaoNotificationDatabase.getInstance(applicationContext).kakaoNotificationDao()
 
-        tvEmptyNotice = findViewById(R.id.tv_emtpy_notice)
-        if (kakaoNotificationDataManager.notificationMap.size == 0) {
-            tvEmptyNotice.visibility = TextView.VISIBLE
+        binding.rvMainNotification.layoutManager = LinearLayoutManager(this)
+        notificationAdapter = ChatroomNotificationAdapter(applicationContext)
+        binding.rvMainNotification.adapter = notificationAdapter
+
+        dao.selectLastNotificationsPerChatroom().observe(this){
+           notificationAdapter.update(it)
         }
-        recyclerView = findViewById(R.id.rv_main_notification)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        setAdapter()
+        dao.isEmpty().observe(this){
+            binding.tvEmtpyNotice.visibility = if (it) TextView.VISIBLE else TextView.INVISIBLE
+        }
+
+        prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        prefsListener = SharedPreferences.OnSharedPreferenceChangeListener{ prefs: SharedPreferences, key: String ->
+            notificationAdapter.notifyDataSetChanged()
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        updateAdapter()
+        prefs.registerOnSharedPreferenceChangeListener(prefsListener)
     }
 
     private fun isNotiPermissionGranted(): Boolean {
@@ -100,24 +102,13 @@ class MainActivity : AppCompatActivity() {
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             return notificationManager.isNotificationListenerAccessGranted(
                 ComponentName(
-                    application,
-                    CustomNotificationListenerService::class.java
+                    application, CustomNotificationListenerService::class.java
                 )
             )
         } else {
             return NotificationManagerCompat.getEnabledListenerPackages(applicationContext)
                 .contains(applicationContext.packageName)
         }
-    }
-
-    private fun setAdapter() {
-        notificationAdapter = ChatroomNotificationAdapter()
-        recyclerView.adapter = notificationAdapter
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    private fun updateAdapter() {
-        notificationAdapter?.update()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -143,11 +134,12 @@ class MainActivity : AppCompatActivity() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (Intent.ACTION_SCREEN_OFF == intent?.action) {
                 finish()
-            } else if (CustomNotificationListenerService.ACTION_NAME == intent?.action) {
-                if (notificationAdapter == null) setAdapter()
-                else updateAdapter()
-                tvEmptyNotice.visibility = TextView.INVISIBLE
             }
+//            } else if (CustomNotificationListenerService.ACTION_NAME == intent?.action) {
+//                if (notificationAdapter == null) setAdapter()
+//                else updateAdapter()
+//                tvEmptyNotice.visibility = TextView.INVISIBLE
+//            }
         }
     }
 }

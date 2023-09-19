@@ -43,8 +43,14 @@ class IconConverter {
             }
         }
 
-        fun iconToString(icon:Icon, context: Context): String?{
-            return bitmapToString(icon.loadDrawable(context)!!.toBitmap())
+//        fun iconToString(icon:Icon, context: Context): String?{
+//            return bitmapToString(icon.loadDrawable(context)!!.toBitmap())
+//        }
+        fun iconToString(icon:Icon?, context: Context): String?{
+            if (icon != null){
+                return bitmapToString(icon.loadDrawable(context)!!.toBitmap())
+            }
+            return null
         }
 
         /*

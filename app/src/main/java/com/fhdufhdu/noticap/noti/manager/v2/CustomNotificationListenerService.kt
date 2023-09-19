@@ -27,13 +27,13 @@ class CustomNotificationListenerService : NotificationListenerService() {
         val ACTION_NAME = "UPDATE_NOTI_CAP"
     }
 
-    init {
-        val jsonSaverRequest = PeriodicWorkRequestBuilder<JsonSaver>(16, TimeUnit.MINUTES).build()
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            "save_json",
-            ExistingPeriodicWorkPolicy.KEEP,
-            jsonSaverRequest)
-    }
+//    init {
+//        val jsonSaverRequest = PeriodicWorkRequestBuilder<JsonSaver>(16, TimeUnit.MINUTES).build()
+//        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+//            "save_json",
+//            ExistingPeriodicWorkPolicy.KEEP,
+//            jsonSaverRequest)
+//    }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification) {
         super.onNotificationRemoved(sbn)
@@ -81,6 +81,7 @@ class CustomNotificationListenerService : NotificationListenerService() {
 
                 notificationManager.notify(1026, builder.build())
             }
+            kakaoNotificationDataManager.saveJson(this)
         }
     }
 
@@ -126,6 +127,8 @@ class CustomNotificationListenerService : NotificationListenerService() {
                 .setContentIntent(pendingIntent)
 //                .setOngoing(true)
             notificationManager.notify(1026, builder.build())
+
+            kakaoNotificationDataManager.saveJson(this)
         }
     }
 

@@ -10,6 +10,7 @@ import androidx.work.WorkManager
 import com.fhdufhdu.noticap.util.IconConverter
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.FileNotFoundException
 import java.util.PriorityQueue
 import java.util.concurrent.TimeUnit
 
@@ -17,6 +18,7 @@ class KakaoNotificationDataManager {
     private val usedId: Array<Boolean> = Array(100000) { false }
     lateinit var notificationMap: HashMap<String, KakaoNotificationDataList>
     val NOTI_JSON = "NOTI_JSON"
+    val JSON_FILE_NAME = "kakao-noti.json"
 
     companion object {
         private var instance: KakaoNotificationDataManager? = null
@@ -80,7 +82,6 @@ class KakaoNotificationDataManager {
         if (notificationMap.containsKey(chatroomName)) {
             val notificationDataList = notificationMap[chatroomName]!!
             return notificationDataList[position]
-
         }
         return null
     }
@@ -102,9 +103,9 @@ class KakaoNotificationDataManager {
         var broadcastIntent = Intent()
         broadcastIntent.action = CustomNotificationListenerService.ACTION_NAME
         context.sendBroadcast(broadcastIntent)
+        saveJson(context)
     }
 
-    @SuppressLint("CommitPrefEdits")
     fun saveJson(context: Context){
         val jsonMap = JSONObject()
         notificationMap.forEach {
@@ -139,44 +140,49 @@ class KakaoNotificationDataManager {
             jsonMap.put(chatroomName, jsonListData)
         }
 
-        Log.d("json", jsonMap.toString())
+        context.openFileOutput(JSON_FILE_NAME, Context.MODE_PRIVATE).use {
+            it.write(jsonMap.toString().toByteArray())
+        }
 
-        val editor = PreferenceManager.getDefaultSharedPreferences(context).edit()
-        editor.putString(NOTI_JSON, jsonMap.toString())
-        editor.apply()
+        Log.d("save json", jsonMap.toString())
     }
 
     fun loadJson(context: Context){
         if(notificationMap.size == 0){
-            val json =
-                PreferenceManager.getDefaultSharedPreferences(context).getString(NOTI_JSON, null)
-                    ?: return
-            val jsonMap = JSONObject(json)
-            jsonMap.keys().forEach {
-                val jsonListData = jsonMap.getJSONObject(it)
-                val jsonList = jsonListData.getJSONArray("list")
-
-                val kakaoNotificationDataList = KakaoNotificationDataList(jsonListData.getInt("id"))
-                kakaoNotificationDataList.lastNotificationTime = jsonListData.getLong("lastNotificationTime")
-                kakaoNotificationDataList.unreadCount = jsonListData.getInt("unreadCount")
-
-                for(idx in 0 until jsonList.length()){
-                    val jsonData = jsonList.getJSONObject(idx)
-                    val kakaoNotificationData = KakaoNotificationData(
-                        jsonData.getString("title"),
-                        jsonData.getString("text"),
-                        jsonData.optString("subText", null),
-                        IconConverter.stringToIcon(jsonData.optString("personIcon", null)),
-                        jsonData.getLong("time"),
-                        null
-                    )
-                    kakaoNotificationData.unread = jsonData.getBoolean("unread")
-                    kakaoNotificationData.doRunAnimation = jsonData.getBoolean("doRunAnimation")
-                    kakaoNotificationDataList.add(kakaoNotificationData)
+            try {
+                val json = context.openFileInput(JSON_FILE_NAME).bufferedReader().useLines {
+                    it.fold(""){a, b -> "$a\n$b"}
                 }
+                Log.d("load json", json)
+                val jsonMap = JSONObject(json)
+                jsonMap.keys().forEach {
+                    val jsonListData = jsonMap.getJSONObject(it)
+                    val jsonList = jsonListData.getJSONArray("list")
 
-                notificationMap[it] = kakaoNotificationDataList
+                    val kakaoNotificationDataList = KakaoNotificationDataList(jsonListData.getInt("id"))
+                    kakaoNotificationDataList.lastNotificationTime = jsonListData.getLong("lastNotificationTime")
+                    kakaoNotificationDataList.unreadCount = jsonListData.getInt("unreadCount")
+
+                    for(idx in 0 until jsonList.length()){
+                        val jsonData = jsonList.getJSONObject(idx)
+                        val kakaoNotificationData = KakaoNotificationData(
+                            jsonData.getString("title"),
+                            jsonData.getString("text"),
+                            jsonData.optString("subText", null),
+                            IconConverter.stringToIcon(jsonData.optString("personIcon", null)),
+                            jsonData.getLong("time"),
+                            null
+                        )
+                        kakaoNotificationData.unread = jsonData.getBoolean("unread")
+                        kakaoNotificationData.doRunAnimation = jsonData.getBoolean("doRunAnimation")
+                        kakaoNotificationDataList.add(kakaoNotificationData)
+                    }
+
+                    notificationMap[it] = kakaoNotificationDataList
+                }
+                Log.d("load json", json)
             }
+            catch (_: FileNotFoundException){ }
         }
     }
 }
