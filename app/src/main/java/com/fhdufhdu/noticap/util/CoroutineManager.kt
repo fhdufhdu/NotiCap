@@ -11,22 +11,22 @@ import kotlinx.coroutines.withContext
 class CoroutineManager {
     companion object {
         @OptIn(DelicateCoroutinesApi::class)
-        fun <T> run(function: suspend () -> T){
+        fun <T> run(function: suspend () -> T) {
             GlobalScope.launch(Dispatchers.IO) {
                 function()
             }
         }
 
         @OptIn(DelicateCoroutinesApi::class)
-        fun <T> runUI(function: suspend () -> T){
+        fun <T> runUI(function: suspend () -> T) {
             GlobalScope.launch {
-                withContext(Dispatchers.Main){
+                withContext(Dispatchers.Main) {
                     function()
                 }
             }
         }
 
-        fun <T> runSync(function: () -> T): T{
+        fun <T> runSync(function: () -> T): T {
             var result: T
             runBlocking {
                 result = GlobalScope.async(Dispatchers.IO) {

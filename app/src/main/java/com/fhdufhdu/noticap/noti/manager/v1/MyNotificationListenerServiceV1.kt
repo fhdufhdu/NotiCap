@@ -31,12 +31,12 @@ class MyNotificationListenerServiceV1 : NotificationListenerService() {
 //        if(sbn.packageName == "com.kakao.talk"){
 //            cancelNotification(sbn.key)
 //        }
-        if(sbn.packageName == "com.kakao.talk"){
+        if (sbn.packageName == "com.kakao.talk") {
             Log.d("number", sbn.notification.number.toString())
             val extras = sbn.notification.extras
-            val title: String = extras.getString(Notification.EXTRA_TITLE)?:"null"
-            val text: String = extras.getString(Notification.EXTRA_TEXT)?:"null"
-            val subText: String = extras.getString(Notification.EXTRA_SUB_TEXT)?:"null"
+            val title: String = extras.getString(Notification.EXTRA_TITLE) ?: "null"
+            val text: String = extras.getString(Notification.EXTRA_TEXT) ?: "null"
+            val subText: String = extras.getString(Notification.EXTRA_SUB_TEXT) ?: "null"
             Log.d("extra", "$title\n$text\n$subText")
         }
     }

@@ -1,4 +1,4 @@
-package com.fhdufhdu.noticap.noti.manager.v2;
+package com.fhdufhdu.noticap.noti.manager.v2
 
 import android.app.PendingIntent
 import android.graphics.drawable.Icon

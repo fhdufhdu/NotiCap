@@ -13,18 +13,16 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
-import com.fhdufhdu.noticap.util.TimeCalculator
-import com.fhdufhdu.noticap.ui.main.detail.DetailActivity
 import com.fhdufhdu.noticap.R
 import com.fhdufhdu.noticap.noti.manager.v3.KakaoNotificationDao
 import com.fhdufhdu.noticap.noti.manager.v3.KakaoNotificationDatabase
-import com.fhdufhdu.noticap.util.SizeManager
 import com.fhdufhdu.noticap.noti.manager.v3.KakaoNotificationPerChatroom
+import com.fhdufhdu.noticap.ui.main.detail.DetailActivity
 import com.fhdufhdu.noticap.util.CoroutineManager
 import com.fhdufhdu.noticap.util.IconConverter
 import com.fhdufhdu.noticap.util.SharedPreferenceManager
-import com.gun0912.tedpermission.provider.TedPermissionProvider
-import kotlinx.coroutines.delay
+import com.fhdufhdu.noticap.util.SizeManager
+import com.fhdufhdu.noticap.util.TimeCalculator
 
 
 class ChatroomNotificationAdapter(applicationContext: Context) :

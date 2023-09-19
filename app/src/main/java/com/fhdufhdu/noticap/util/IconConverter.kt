@@ -12,7 +12,7 @@ import java.io.ByteArrayOutputStream
 
 class IconConverter {
 
-    companion object{
+    companion object {
         fun stringToBitmap(encodedString: String?): Bitmap? {
             return try {
                 val encodeByte: ByteArray = Base64.decode(encodedString, Base64.DEFAULT)
@@ -33,21 +33,21 @@ class IconConverter {
             return Base64.encodeToString(bytes, Base64.DEFAULT)
         }
 
-        fun stringToIcon(encodedString: String?): Icon?{
-            return try{
+        fun stringToIcon(encodedString: String?): Icon? {
+            return try {
                 val bitmap = stringToBitmap(encodedString)
                 bitmap?.toIcon()
-            } catch (e: Exception){
+            } catch (e: Exception) {
                 e.message
                 null
             }
         }
 
-//        fun iconToString(icon:Icon, context: Context): String?{
+        //        fun iconToString(icon:Icon, context: Context): String?{
 //            return bitmapToString(icon.loadDrawable(context)!!.toBitmap())
 //        }
-        fun iconToString(icon:Icon?, context: Context): String?{
-            if (icon != null){
+        fun iconToString(icon: Icon?, context: Context): String? {
+            if (icon != null) {
                 return bitmapToString(icon.loadDrawable(context)!!.toBitmap())
             }
             return null

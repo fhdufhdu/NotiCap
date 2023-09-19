@@ -1,4 +1,4 @@
-package com.fhdufhdu.noticap.noti.manager.v3;
+package com.fhdufhdu.noticap.noti.manager.v3
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
@@ -6,17 +6,19 @@ import androidx.room.Insert
 import androidx.room.Query
 
 @Dao
-interface KakaoNotificationDao{
-    @Query("select n2.*, " +
-            "     (select count(*) " +
-            "      from Notification " +
-            "      where chatroom_name = n1.chatroom_name and unread = 1) as unread_count " +
-            "from (select chatroom_name, max(time) as max_time " +
-            "      from Notification " +
-            "      group by chatroom_name) n1 " +
-            "join Notification n2 " +
-            "on n1.chatroom_name=n2.chatroom_name and n1.max_time = n2.time " +
-            "order by n1.max_time desc")
+interface KakaoNotificationDao {
+    @Query(
+        "select n2.*, " +
+                "     (select count(*) " +
+                "      from Notification " +
+                "      where chatroom_name = n1.chatroom_name and unread = 1) as unread_count " +
+                "from (select chatroom_name, max(time) as max_time " +
+                "      from Notification " +
+                "      group by chatroom_name) n1 " +
+                "join Notification n2 " +
+                "on n1.chatroom_name=n2.chatroom_name and n1.max_time = n2.time " +
+                "order by n1.max_time desc"
+    )
     fun selectLastNotificationsPerChatroom(): LiveData<List<KakaoNotificationPerChatroom>>
 
     @Query("select * from Notification where chatroom_name = :chatroomName order by time desc")

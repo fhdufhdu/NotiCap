@@ -13,7 +13,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.WindowManager
@@ -24,9 +23,9 @@ import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.fhdufhdu.noticap.R
 import com.fhdufhdu.noticap.databinding.ActivityMainBinding
-import com.fhdufhdu.noticap.ui.setting.SettingActivity
 import com.fhdufhdu.noticap.noti.manager.v3.CustomNotificationListenerService
 import com.fhdufhdu.noticap.noti.manager.v3.KakaoNotificationDatabase
+import com.fhdufhdu.noticap.ui.setting.SettingActivity
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.normal.TedPermission
 
@@ -35,7 +34,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var notificationAdapter: ChatroomNotificationAdapter
     private lateinit var prefs: SharedPreferences
-    private lateinit var prefsListener:SharedPreferences.OnSharedPreferenceChangeListener
+    private lateinit var prefsListener: SharedPreferences.OnSharedPreferenceChangeListener
 
     @SuppressLint("SuspiciousIndentation", "NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,17 +77,18 @@ class MainActivity : AppCompatActivity() {
         notificationAdapter = ChatroomNotificationAdapter(applicationContext)
         binding.rvMainNotification.adapter = notificationAdapter
 
-        dao.selectLastNotificationsPerChatroom().observe(this){
-           notificationAdapter.update(it)
+        dao.selectLastNotificationsPerChatroom().observe(this) {
+            notificationAdapter.update(it)
         }
-        dao.isEmpty().observe(this){
+        dao.isEmpty().observe(this) {
             binding.tvEmtpyNotice.visibility = if (it) TextView.VISIBLE else TextView.INVISIBLE
         }
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        prefsListener = SharedPreferences.OnSharedPreferenceChangeListener{ prefs: SharedPreferences, key: String ->
-            notificationAdapter.notifyDataSetChanged()
-        }
+        prefsListener =
+            SharedPreferences.OnSharedPreferenceChangeListener { prefs: SharedPreferences, key: String ->
+                notificationAdapter.notifyDataSetChanged()
+            }
     }
 
     override fun onResume() {

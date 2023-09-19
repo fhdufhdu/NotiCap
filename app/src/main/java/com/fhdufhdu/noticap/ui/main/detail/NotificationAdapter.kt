@@ -13,15 +13,15 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
-import com.fhdufhdu.noticap.util.TimeCalculator
 import com.fhdufhdu.noticap.R
-import com.fhdufhdu.noticap.util.SizeManager
 import com.fhdufhdu.noticap.noti.manager.v3.KakaoNotification
 import com.fhdufhdu.noticap.noti.manager.v3.KakaoNotificationDao
 import com.fhdufhdu.noticap.noti.manager.v3.KakaoNotificationDatabase
 import com.fhdufhdu.noticap.noti.manager.v3.MemDB
 import com.fhdufhdu.noticap.util.IconConverter
 import com.fhdufhdu.noticap.util.SharedPreferenceManager
+import com.fhdufhdu.noticap.util.SizeManager
+import com.fhdufhdu.noticap.util.TimeCalculator
 
 
 class NotificationAdapter(applicationContext: Context) :
@@ -29,6 +29,7 @@ class NotificationAdapter(applicationContext: Context) :
 
     private var dao: KakaoNotificationDao
     private var kakaoNotifications: List<KakaoNotification> = ArrayList()
+
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvTitle: TextView = itemView.findViewById(R.id.tv_title)
         val tvSubText: TextView = itemView.findViewById(R.id.tv_sub_text)
@@ -76,10 +77,10 @@ class NotificationAdapter(applicationContext: Context) :
                     pendingIntent.send()
                 } else {
                     val compName =
-                        ComponentName("com.kakao.talk", "com.kakao.talk.activity.SplashActivity");
-                    val intent = Intent(Intent.ACTION_MAIN);
-                    intent.addCategory(Intent.CATEGORY_ALTERNATIVE);
-                    intent.component = compName;
+                        ComponentName("com.kakao.talk", "com.kakao.talk.activity.SplashActivity")
+                    val intent = Intent(Intent.ACTION_MAIN)
+                    intent.addCategory(Intent.CATEGORY_ALTERNATIVE)
+                    intent.component = compName
                     context.startActivity(intent)
                 }
             }

@@ -1,8 +1,8 @@
-package com.fhdufhdu.noticap.noti.manager.v2;
+package com.fhdufhdu.noticap.noti.manager.v2
 
 import java.util.LinkedList
 
-class KakaoNotificationDataList(var id: Int) : LinkedList<KakaoNotificationData>(){
+class KakaoNotificationDataList(var id: Int) : LinkedList<KakaoNotificationData>() {
     var lastNotificationTime: Long = System.currentTimeMillis()
     var unreadCount: Int = 0
 

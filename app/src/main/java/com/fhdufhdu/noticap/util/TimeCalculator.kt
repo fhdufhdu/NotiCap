@@ -1,7 +1,6 @@
 package com.fhdufhdu.noticap.util
 
 import android.annotation.SuppressLint
-import android.content.SharedPreferences
 import java.text.SimpleDateFormat
 import java.util.Locale
 

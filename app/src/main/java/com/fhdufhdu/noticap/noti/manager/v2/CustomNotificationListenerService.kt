@@ -11,15 +11,10 @@ import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.graphics.drawable.IconCompat
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
-import com.fhdufhdu.noticap.ui.main.MainActivity
 import com.fhdufhdu.noticap.R
-import java.util.concurrent.TimeUnit
+import com.fhdufhdu.noticap.ui.main.MainActivity
 
 class CustomNotificationListenerService : NotificationListenerService() {
     companion object {
@@ -121,7 +116,9 @@ class CustomNotificationListenerService : NotificationListenerService() {
             val builder = NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(IconCompat.createWithResource(this, R.drawable.ic_notification))
                 .setContentTitle("새로운 카카오톡 알림")
-                .setContentText(kakaoNotificationDataManager.getUnreadChatroomNames().joinToString(", "))
+                .setContentText(
+                    kakaoNotificationDataManager.getUnreadChatroomNames().joinToString(", ")
+                )
                 .setCategory(NotificationCompat.CATEGORY_MESSAGE)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setContentIntent(pendingIntent)

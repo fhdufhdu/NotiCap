@@ -1,4 +1,4 @@
-package com.fhdufhdu.noticap.noti.manager.v1;
+package com.fhdufhdu.noticap.noti.manager.v1
 
 import java.text.SimpleDateFormat
 

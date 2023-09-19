@@ -3,7 +3,7 @@ package com.fhdufhdu.noticap.util
 import android.util.DisplayMetrics
 
 class SizeManager {
-    companion object{
+    companion object {
         fun dpToPx(dp: Int, displayMetrics: DisplayMetrics): Int {
             val scale = displayMetrics.density
             return (dp * scale).toInt()

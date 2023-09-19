@@ -1,11 +1,10 @@
 package com.fhdufhdu.noticap.noti.manager.v3
 
 import androidx.room.ColumnInfo
-import androidx.room.PrimaryKey
 
 data class KakaoNotificationPerChatroom(
 
-    @ColumnInfo(name="chatroom_name")
+    @ColumnInfo(name = "chatroom_name")
     val chatroomName: String,
 
     @ColumnInfo
@@ -14,19 +13,19 @@ data class KakaoNotificationPerChatroom(
     @ColumnInfo
     val content: String,
 
-    @ColumnInfo(name="person_icon")
+    @ColumnInfo(name = "person_icon")
     val personIcon: String?,
 
     @ColumnInfo
     val time: Long,
 
-    @ColumnInfo(name="unread_count")
+    @ColumnInfo(name = "unread_count")
     val unreadCount: Int,
 
     @ColumnInfo
     var unread: Boolean,
 
-    @ColumnInfo(name="do_run_animation")
+    @ColumnInfo(name = "do_run_animation")
     var doRunAnimation: Boolean,
 
     @ColumnInfo

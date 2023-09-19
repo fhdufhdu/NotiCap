@@ -1,4 +1,4 @@
-package com.fhdufhdu.noticap.noti.manager.v1;
+package com.fhdufhdu.noticap.noti.manager.v1
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -150,10 +150,10 @@ class KtNotificationCaptureManagerV1 {
 
     private fun sendNotification(ktNotificationData: KtNotificationDataV1) {
         var compName =
-            ComponentName(KAKAO_TALK_PACKAGE, "com.kakao.talk.activity.SplashActivity");
-        var intent = Intent(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_ALTERNATIVE);
-        intent.component = compName;
+            ComponentName(KAKAO_TALK_PACKAGE, "com.kakao.talk.activity.SplashActivity")
+        var intent = Intent(Intent.ACTION_MAIN)
+        intent.addCategory(Intent.CATEGORY_ALTERNATIVE)
+        intent.component = compName
 
         val pendingIntent: PendingIntent = PendingIntent.getActivity(
             context, 0, intent,
@@ -218,8 +218,7 @@ class KtNotificationCaptureManagerV1 {
         var chatroomName: String,
         var sender: String,
         var text: String
-    ) {
-    }
+    )
 
     class NotKtNotification constructor(val type: Int) : RuntimeException() {
         companion object {
