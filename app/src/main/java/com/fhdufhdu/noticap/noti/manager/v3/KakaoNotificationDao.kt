@@ -17,12 +17,24 @@ interface KakaoNotificationDao {
                 "      group by chatroom_name) n1 " +
                 "join Notification n2 " +
                 "on n1.chatroom_name=n2.chatroom_name and n1.max_time = n2.time " +
-                "order by n1.max_time desc"
+                "order by n1.max_time desc " +
+                "limit :limit"
     )
-    fun selectLastNotificationsPerChatroom(): LiveData<List<KakaoNotificationPerChatroom>>
+    fun selectLastNotificationsPerChatroom(limit: Int): LiveData<List<KakaoNotificationPerChatroom>>
 
-    @Query("select * from Notification where chatroom_name = :chatroomName order by time desc")
-    fun selectMany(chatroomName: String): LiveData<List<KakaoNotification>>
+    @Query(
+        "select count(*) " +
+        "from (select chatroom_name " +
+                "from Notification " +
+                "group by chatroom_name) n1"
+    )
+    fun count(): Int
+
+    @Query("select * from Notification where chatroom_name = :chatroomName order by time desc limit :limit")
+    fun selectMany(chatroomName: String, limit: Int): LiveData<List<KakaoNotification>>
+
+    @Query("select count(*) from Notification where chatroom_name = :chatroomName")
+    fun count(chatroomName: String): Int
 
     @Query("select chatroom_name, count(*) as unread_count  from Notification where unread = 1 group by chatroom_name order by max(time) desc")
     fun selectUnreadChatrooms(): List<KakaoUnreadNotification>

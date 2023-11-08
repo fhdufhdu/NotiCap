@@ -13,19 +13,25 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.WindowManager
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
+import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.fhdufhdu.noticap.R
 import com.fhdufhdu.noticap.databinding.ActivityMainBinding
 import com.fhdufhdu.noticap.noti.manager.v3.CustomNotificationListenerService
+import com.fhdufhdu.noticap.noti.manager.v3.KakaoNotification
 import com.fhdufhdu.noticap.noti.manager.v3.KakaoNotificationDatabase
+import com.fhdufhdu.noticap.noti.manager.v3.KakaoNotificationPerChatroom
 import com.fhdufhdu.noticap.ui.setting.SettingActivity
+import com.fhdufhdu.noticap.util.CoroutineManager
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.normal.TedPermission
 
@@ -35,6 +41,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var notificationAdapter: ChatroomNotificationAdapter
     private lateinit var prefs: SharedPreferences
     private lateinit var prefsListener: SharedPreferences.OnSharedPreferenceChangeListener
+    private var notificationLimit: Int = 20
 
     @SuppressLint("SuspiciousIndentation", "NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,9 +84,12 @@ class MainActivity : AppCompatActivity() {
         notificationAdapter = ChatroomNotificationAdapter(applicationContext)
         binding.rvMainNotification.adapter = notificationAdapter
 
-        dao.selectLastNotificationsPerChatroom().observe(this) {
+        var liveNotificationList = dao.selectLastNotificationsPerChatroom(notificationLimit)
+        var observer = Observer<List<KakaoNotificationPerChatroom>>{
             notificationAdapter.update(it)
         }
+        liveNotificationList.observe(this, observer)
+
         dao.isEmpty().observe(this) {
             binding.tvEmtpyNotice.visibility = if (it) TextView.VISIBLE else TextView.INVISIBLE
         }
@@ -89,6 +99,33 @@ class MainActivity : AppCompatActivity() {
             SharedPreferences.OnSharedPreferenceChangeListener { prefs: SharedPreferences, key: String ->
                 notificationAdapter.notifyDataSetChanged()
             }
+
+        val thisInstance = this
+        binding.rvMainNotification.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                // 마지막 스크롤된 항목 위치
+                val lastVisibleItemPosition = (recyclerView.layoutManager as LinearLayoutManager?)!!.findLastCompletelyVisibleItemPosition()
+                // 항목 전체 개수
+                val itemTotalCount = recyclerView.adapter!!.itemCount - 1
+                if (lastVisibleItemPosition == itemTotalCount) {
+                    val notificationCount =
+                        CoroutineManager.runSync { dao.count() }
+
+                    if (notificationLimit < notificationCount){
+                        liveNotificationList.removeObserver(observer)
+                        notificationLimit += 20
+
+                        liveNotificationList = dao.selectLastNotificationsPerChatroom(notificationLimit)
+                        observer = Observer{
+                            notificationAdapter.update(it)
+                        }
+                        liveNotificationList.observe(thisInstance, observer)
+                    }
+
+                }
+            }
+        })
     }
 
     override fun onResume() {

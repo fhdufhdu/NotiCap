@@ -10,6 +10,7 @@ import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.graphics.drawable.IconCompat
 import com.fhdufhdu.noticap.R
@@ -45,6 +46,7 @@ class CustomNotificationListenerService : NotificationListenerService() {
                     && memDB.removeLastNotificationData.content == notificationData.content
                     && memDB.removeLastNotificationData.time == notificationData.time
                 ) {
+                    Log.d("twice fire",chatroomName)
                     return
                 }
 
@@ -54,7 +56,7 @@ class CustomNotificationListenerService : NotificationListenerService() {
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
 
                 val pendingIntent: PendingIntent = PendingIntent.getActivity(
-                    this, 1026, intent,
+                    this, 1028, intent,
                     PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_MUTABLE
                 )
 
@@ -97,6 +99,7 @@ class CustomNotificationListenerService : NotificationListenerService() {
         val extras = sbn.notification.extras
 
         val memDB = MemDB.getInstance()
+        Log.d("package", nPackageName)
         if (nPackageName == "com.kakao.talk") {
             synchronized(memDB.postLastNotificationData) {
                 val notificationInfo = getNotificationInfo(sbn.notification, extras) ?: return
@@ -111,6 +114,7 @@ class CustomNotificationListenerService : NotificationListenerService() {
                     && memDB.postLastNotificationData.content == notificationData.content
                     && memDB.postLastNotificationData.time == notificationData.time
                 ) {
+                    Log.d("twice fire",chatroomName)
                     return
                 }
 
@@ -120,7 +124,7 @@ class CustomNotificationListenerService : NotificationListenerService() {
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
 
                 val pendingIntent: PendingIntent = PendingIntent.getActivity(
-                    this, 1026, intent,
+                    this, 1027, intent,
                     PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_MUTABLE
                 )
 
