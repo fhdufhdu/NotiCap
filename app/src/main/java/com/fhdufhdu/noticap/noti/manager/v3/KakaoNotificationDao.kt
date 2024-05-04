@@ -18,9 +18,10 @@ interface KakaoNotificationDao {
                 "join Notification n2 " +
                 "on n1.chatroom_name=n2.chatroom_name and n1.max_time = n2.time " +
                 "order by n1.max_time desc " +
-                "limit :limit"
+                "limit :pageSize " +
+                "offset :pageNumber * :pageSize"
     )
-    fun selectLastNotificationsPerChatroom(limit: Int): LiveData<List<KakaoNotificationPerChatroom>>
+    fun selectLastNotificationsPerChatroom(pageNumber: Int, pageSize: Int): List<KakaoNotificationPerChatroom>
 
     @Query(
         "select count(*) " +
@@ -30,8 +31,8 @@ interface KakaoNotificationDao {
     )
     fun count(): Int
 
-    @Query("select * from Notification where chatroom_name = :chatroomName order by time desc limit :limit")
-    fun selectMany(chatroomName: String, limit: Int): LiveData<List<KakaoNotification>>
+    @Query("select * from Notification where chatroom_name = :chatroomName order by time desc limit :pageSize offset :pageNumber * :pageSize")
+    fun selectMany(chatroomName: String, pageNumber: Int, pageSize: Int): List<KakaoNotification>
 
     @Query("select count(*) from Notification where chatroom_name = :chatroomName")
     fun count(chatroomName: String): Int

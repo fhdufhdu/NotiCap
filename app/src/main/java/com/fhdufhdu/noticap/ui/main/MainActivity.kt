@@ -21,6 +21,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -41,7 +42,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var notificationAdapter: ChatroomNotificationAdapter
     private lateinit var prefs: SharedPreferences
     private lateinit var prefsListener: SharedPreferences.OnSharedPreferenceChangeListener
-    private var notificationLimit: Int = 20
+    private lateinit var viewModel: KakaoNotificationPerChatroomViewModel
+    private val NOTIFICATION_PAGE_SIZE = 20
+    private var notificationPageNumber = 0
+
 
     @SuppressLint("SuspiciousIndentation", "NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -84,11 +88,15 @@ class MainActivity : AppCompatActivity() {
         notificationAdapter = ChatroomNotificationAdapter(applicationContext)
         binding.rvMainNotification.adapter = notificationAdapter
 
-        var liveNotificationList = dao.selectLastNotificationsPerChatroom(notificationLimit)
-        var observer = Observer<List<KakaoNotificationPerChatroom>>{
+        viewModel = ViewModelProvider(this, KakaoNotificationPerChatroomViewModelFactory(dao)).get(
+            KakaoNotificationPerChatroomViewModel::class.java
+        )
+        viewModel.fetchFirstPage(NOTIFICATION_PAGE_SIZE)
+
+        var observer = Observer<List<KakaoNotificationPerChatroom>> {
             notificationAdapter.update(it)
         }
-        liveNotificationList.observe(this, observer)
+        viewModel.notificationList.observe(this, observer)
 
         dao.isEmpty().observe(this) {
             binding.tvEmtpyNotice.visibility = if (it) TextView.VISIBLE else TextView.INVISIBLE
@@ -105,22 +113,30 @@ class MainActivity : AppCompatActivity() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 // 마지막 스크롤된 항목 위치
-                val lastVisibleItemPosition = (recyclerView.layoutManager as LinearLayoutManager?)!!.findLastCompletelyVisibleItemPosition()
+                val lastVisibleItemPosition =
+                    (recyclerView.layoutManager as LinearLayoutManager?)!!.findLastCompletelyVisibleItemPosition()
                 // 항목 전체 개수
                 val itemTotalCount = recyclerView.adapter!!.itemCount - 1
                 if (lastVisibleItemPosition == itemTotalCount) {
                     val notificationCount =
                         CoroutineManager.runSync { dao.count() }
 
-                    if (notificationLimit < notificationCount){
-                        liveNotificationList.removeObserver(observer)
-                        notificationLimit += 20
+                    if (NOTIFICATION_PAGE_SIZE * (notificationPageNumber + 1) < notificationCount) {
+//                        liveNotificationList.removeObserver(observer)
+                        notificationPageNumber++
+                        viewModel.fetchNextPage(notificationPageNumber, NOTIFICATION_PAGE_SIZE)
 
-                        liveNotificationList = dao.selectLastNotificationsPerChatroom(notificationLimit)
-                        observer = Observer{
-                            notificationAdapter.update(it)
-                        }
-                        liveNotificationList.observe(thisInstance, observer)
+//                        val nextNotificationList =
+//                            dao.selectLastNotificationsPerChatroom(
+//                                notificationPageNumber,
+//                                NOTIFICATION_PAGE_SIZE
+//                            )
+//
+
+//                        observer = Observer {
+//                            notificationAdapter.update(it)
+//                        }
+//                        liveNotificationList.observe(thisInstance, observer)
                     }
 
                 }

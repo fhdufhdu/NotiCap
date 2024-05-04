@@ -18,6 +18,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -27,6 +28,8 @@ import com.fhdufhdu.noticap.noti.manager.v2.CustomNotificationListenerService
 import com.fhdufhdu.noticap.noti.manager.v3.KakaoNotification
 import com.fhdufhdu.noticap.noti.manager.v3.KakaoNotificationDao
 import com.fhdufhdu.noticap.noti.manager.v3.KakaoNotificationDatabase
+import com.fhdufhdu.noticap.ui.main.KakaoNotificationPerChatroomViewModel
+import com.fhdufhdu.noticap.ui.main.KakaoNotificationPerChatroomViewModelFactory
 import com.fhdufhdu.noticap.ui.main.MainActivity
 import com.fhdufhdu.noticap.util.CoroutineManager
 
@@ -37,8 +40,10 @@ class DetailActivity : AppCompatActivity() {
     private lateinit var notificationAdapter: NotificationAdapter
     private lateinit var prefs: SharedPreferences
     private lateinit var prefsListener: SharedPreferences.OnSharedPreferenceChangeListener
-    private var notificationLimit: Int = 20
+    private var NOTIFICATION_PAGE_SIZE: Int = 20
+    private var notificationPageNumber = 0
     private lateinit var dao:KakaoNotificationDao
+    private lateinit var viewModel: KakaoNotificationViewModel
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,12 +76,15 @@ class DetailActivity : AppCompatActivity() {
         notificationAdapter = NotificationAdapter(applicationContext)
         binding.rvNotification.adapter = notificationAdapter
 
-        var liveNotificationList = dao.selectMany(chatroomName, notificationLimit)
+        viewModel = ViewModelProvider(this, KakaoNotificationViewModelFactory(dao)).get(
+            KakaoNotificationViewModel::class.java
+        )
+        viewModel.fetchFirstPage(chatroomName, NOTIFICATION_PAGE_SIZE)
+
         var observer = Observer<List<KakaoNotification>>{
             notificationAdapter.update(it)
         }
-
-        liveNotificationList.observe(this, observer)
+        viewModel.notificationList.observe(this, observer)
 
         val thisInstance = this
         binding.rvNotification.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -90,15 +98,9 @@ class DetailActivity : AppCompatActivity() {
                     val notificationCount =
                         CoroutineManager.runSync { dao.count(chatroomName) }
 
-                    if (notificationLimit < notificationCount){
-                        liveNotificationList.removeObserver(observer)
-                        notificationLimit += 20
-
-                        liveNotificationList = dao.selectMany(chatroomName, notificationLimit)
-                        observer = Observer{
-                            notificationAdapter.update(it)
-                        }
-                        liveNotificationList.observe(thisInstance, observer)
+                    if ((notificationPageNumber + 1) * NOTIFICATION_PAGE_SIZE < notificationCount){
+                        notificationPageNumber++
+                        viewModel.fetchNextPage(chatroomName, notificationPageNumber, NOTIFICATION_PAGE_SIZE)
                     }
 
                 }
