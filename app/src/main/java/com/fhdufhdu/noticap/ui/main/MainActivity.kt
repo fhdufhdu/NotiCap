@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.fhdufhdu.noticap.R
 import com.fhdufhdu.noticap.databinding.ActivityMainBinding
 import com.fhdufhdu.noticap.notification.manager.CustomNotificationListenerService
+import com.fhdufhdu.noticap.notification.manager.KakaoNotificationSender
 import com.fhdufhdu.noticap.notification.room.KakaoNotificationDatabase
 import com.fhdufhdu.noticap.notification.room.projections.KakaoNotificationPerChatroom
 import com.fhdufhdu.noticap.ui.setting.SettingActivity
@@ -77,7 +78,7 @@ class MainActivity : AppCompatActivity() {
         val screenOffReceiver = ScreenOffReceiver()
         val filter = IntentFilter()
         filter.addAction(Intent.ACTION_SCREEN_OFF)
-        filter.addAction(CustomNotificationListenerService.ACTION_NAME)
+        filter.addAction(KakaoNotificationSender.ACTION_NAME)
         registerReceiver(screenOffReceiver, filter)
 
         val dao = KakaoNotificationDatabase.getInstance(applicationContext).kakaoNotificationDao()

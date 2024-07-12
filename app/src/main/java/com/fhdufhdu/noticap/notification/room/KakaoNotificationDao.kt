@@ -11,31 +11,42 @@ import com.fhdufhdu.noticap.notification.room.projections.KakaoUnreadNotificatio
 @Dao
 interface KakaoNotificationDao {
     @Query(
-        "select n2.*, " +
-                "     (select count(*) " +
-                "      from Notification " +
-                "      where chatroom_name = n1.chatroom_name and unread = 1) as unread_count " +
-                "from (select chatroom_name, max(time) as max_time " +
-                "      from Notification " +
-                "      group by chatroom_name) n1 " +
-                "join Notification n2 " +
-                "on n1.chatroom_name=n2.chatroom_name and n1.max_time = n2.time " +
-                "order by n1.max_time desc " +
-                "limit :pageSize " +
-                "offset :pageNumber * :pageSize"
+        """
+            select n2.*,
+                 (select count(*)
+                  from Notification
+                  where chatroom_name = n1.chatroom_name and unread = 1) as unread_count
+            from (select chatroom_name, max(time) as max_time
+                  from Notification
+                  group by chatroom_name) n1
+            join Notification n2
+            on n1.chatroom_name=n2.chatroom_name and n1.max_time = n2.time
+            order by n1.max_time desc
+            limit :pageSize
+            offset :pageNumber * :pageSize
+        """
     )
-    fun selectLastNotificationsPerChatroom(pageNumber: Int, pageSize: Int): List<KakaoNotificationPerChatroom>
+    fun selectLastNotificationsPerChatroom(
+        pageNumber: Int,
+        pageSize: Int
+    ): List<KakaoNotificationPerChatroom>
 
     @Query(
-        "select count(*) " +
-        "from (select chatroom_name " +
-                "from Notification " +
-                "group by chatroom_name) n1"
+        """
+            select count(*)
+            from (select chatroom_name
+                    from Notification
+                    group by chatroom_name) n1
+        """
     )
     fun count(): Int
 
     @Query("select * from Notification where chatroom_name = :chatroomName order by time desc limit :pageSize offset :pageNumber * :pageSize")
-    fun selectMany(chatroomName: String, pageNumber: Int, pageSize: Int): List<KakaoNotificationEntity>
+    fun selectMany(
+        chatroomName: String,
+        pageNumber: Int,
+        pageSize: Int
+    ): List<KakaoNotificationEntity>
 
     @Query("select count(*) from Notification where chatroom_name = :chatroomName")
     fun count(chatroomName: String): Int

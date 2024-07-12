@@ -1,25 +1,13 @@
 package com.fhdufhdu.noticap.notification.manager
 
 import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.content.Context
-import android.content.Intent
 import android.graphics.drawable.Icon
-import android.os.Build
 import android.os.Bundle
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
-import androidx.core.graphics.drawable.IconCompat
-import com.fhdufhdu.noticap.R
-import com.fhdufhdu.noticap.notification.room.KakaoNotificationDao
-import com.fhdufhdu.noticap.notification.room.KakaoNotificationDatabase
 import com.fhdufhdu.noticap.notification.room.entities.KakaoNotificationEntity
-import com.fhdufhdu.noticap.ui.main.MainActivity
 import com.fhdufhdu.noticap.util.CoroutineManager
 import com.fhdufhdu.noticap.util.IconConverter
 
@@ -27,13 +15,8 @@ import com.fhdufhdu.noticap.util.IconConverter
 class CustomNotificationListenerService : NotificationListenerService() {
     private var kakaoNotificationSender: KakaoNotificationSender? = null
 
-    companion object {
-        val CHANNEL_ID = "CAPTURE"
-        val ACTION_NAME = "UPDATE_NOTI_CAP"
-    }
-
-    private fun initNotificationSender(){
-        kakaoNotificationSender = kakaoNotificationSender ?: KakaoNotificationSender(this);
+    private fun initNotificationSender() {
+        kakaoNotificationSender = kakaoNotificationSender ?: KakaoNotificationSender(this)
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification) {

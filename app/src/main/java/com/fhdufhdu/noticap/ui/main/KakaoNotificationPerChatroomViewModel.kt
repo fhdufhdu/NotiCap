@@ -13,15 +13,15 @@ class KakaoNotificationPerChatroomViewModel(private val dao: KakaoNotificationDa
         get() = _notificationList
 
     fun fetchFirstPage(pageSize: Int) {
-        CoroutineManager.runSync{
+        CoroutineManager.runSync {
             val firstPage = ArrayList(dao.selectLastNotificationsPerChatroom(0, pageSize))
             _notificationList.postValue(firstPage)
         }
     }
 
     fun fetchNextPage(pageNumber: Int, pageSize: Int) {
-        val prevList = _notificationList.value?: return
-        CoroutineManager.runSync{
+        val prevList = _notificationList.value ?: return
+        CoroutineManager.runSync {
             val nextPage = dao.selectLastNotificationsPerChatroom(pageNumber, pageSize)
             prevList.addAll(nextPage)
             _notificationList.postValue(prevList)

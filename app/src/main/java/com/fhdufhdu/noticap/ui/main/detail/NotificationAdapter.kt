@@ -2,7 +2,6 @@ package com.fhdufhdu.noticap.ui.main.detail
 
 import android.annotation.SuppressLint
 import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
@@ -16,8 +15,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.fhdufhdu.noticap.R
 import com.fhdufhdu.noticap.notification.manager.MemDB
 import com.fhdufhdu.noticap.notification.room.entities.KakaoNotificationEntity
-import com.fhdufhdu.noticap.notification.room.KakaoNotificationDao
-import com.fhdufhdu.noticap.notification.room.KakaoNotificationDatabase
 import com.fhdufhdu.noticap.util.IconConverter
 import com.fhdufhdu.noticap.util.SharedPreferenceManager
 import com.fhdufhdu.noticap.util.SizeManager

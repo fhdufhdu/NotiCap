@@ -7,14 +7,12 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import androidx.core.app.Person
 import androidx.core.graphics.drawable.IconCompat
 import com.fhdufhdu.noticap.R
 import com.fhdufhdu.noticap.notification.room.KakaoNotificationDao
 import com.fhdufhdu.noticap.notification.room.KakaoNotificationDatabase
 import com.fhdufhdu.noticap.notification.room.entities.KakaoNotificationEntity
 import com.fhdufhdu.noticap.ui.main.MainActivity
-import kotlin.text.StringBuilder
 
 class KakaoNotificationSender(private val context: Context) {
     private val notificationManager: NotificationManager
@@ -32,7 +30,7 @@ class KakaoNotificationSender(private val context: Context) {
         val descriptionText = context.getString(R.string.channel_description)
         val importance = NotificationManager.IMPORTANCE_LOW
         val channel = NotificationChannel(
-            CustomNotificationListenerService.CHANNEL_ID,
+            CHANNEL_ID,
             name,
             importance
         ).apply {
@@ -87,9 +85,9 @@ class KakaoNotificationSender(private val context: Context) {
     }
 
     fun addAndSendNotification(kakaoNotificationEntity: KakaoNotificationEntity) {
-        try{
+        try {
             kakaoNotificationDao.insertNotification(kakaoNotificationEntity)
-        }catch(exception:Exception){
+        } catch (exception: Exception) {
             Log.e("중복 저장", exception.toString())
         }
         sendNotification()

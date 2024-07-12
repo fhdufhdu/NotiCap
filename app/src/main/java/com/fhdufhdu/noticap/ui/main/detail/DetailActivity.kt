@@ -1,9 +1,6 @@
 package com.fhdufhdu.noticap.ui.main.detail
 
 import android.annotation.SuppressLint
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -13,21 +10,16 @@ import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.NotificationCompat
-import androidx.core.graphics.drawable.IconCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.fhdufhdu.noticap.R
 import com.fhdufhdu.noticap.databinding.ActivityNotificationBinding
-import com.fhdufhdu.noticap.notification.manager.CustomNotificationListenerService
 import com.fhdufhdu.noticap.notification.manager.KakaoNotificationSender
-import com.fhdufhdu.noticap.notification.room.entities.KakaoNotificationEntity
 import com.fhdufhdu.noticap.notification.room.KakaoNotificationDao
 import com.fhdufhdu.noticap.notification.room.KakaoNotificationDatabase
-import com.fhdufhdu.noticap.ui.main.MainActivity
+import com.fhdufhdu.noticap.notification.room.entities.KakaoNotificationEntity
 import com.fhdufhdu.noticap.util.CoroutineManager
 
 
@@ -62,7 +54,7 @@ class DetailActivity : AppCompatActivity() {
         val screenOffReceiver = ScreenOffReceiver()
         val filter = IntentFilter()
         filter.addAction(Intent.ACTION_SCREEN_OFF)
-        filter.addAction(CustomNotificationListenerService.ACTION_NAME)
+        filter.addAction(KakaoNotificationSender.ACTION_NAME)
         registerReceiver(screenOffReceiver, filter)
 
         dao = KakaoNotificationDatabase.getInstance(applicationContext).kakaoNotificationDao()
