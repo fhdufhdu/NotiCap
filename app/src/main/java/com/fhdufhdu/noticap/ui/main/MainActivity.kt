@@ -13,7 +13,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.WindowManager
@@ -27,10 +26,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fhdufhdu.noticap.R
 import com.fhdufhdu.noticap.databinding.ActivityMainBinding
-import com.fhdufhdu.noticap.noti.manager.v3.CustomNotificationListenerService
-import com.fhdufhdu.noticap.noti.manager.v3.KakaoNotification
-import com.fhdufhdu.noticap.noti.manager.v3.KakaoNotificationDatabase
-import com.fhdufhdu.noticap.noti.manager.v3.KakaoNotificationPerChatroom
+import com.fhdufhdu.noticap.notification.manager.CustomNotificationListenerService
+import com.fhdufhdu.noticap.notification.room.KakaoNotificationDatabase
+import com.fhdufhdu.noticap.notification.room.projections.KakaoNotificationPerChatroom
 import com.fhdufhdu.noticap.ui.setting.SettingActivity
 import com.fhdufhdu.noticap.util.CoroutineManager
 import com.gun0912.tedpermission.PermissionListener
@@ -122,21 +120,8 @@ class MainActivity : AppCompatActivity() {
                         CoroutineManager.runSync { dao.count() }
 
                     if (NOTIFICATION_PAGE_SIZE * (notificationPageNumber + 1) < notificationCount) {
-//                        liveNotificationList.removeObserver(observer)
                         notificationPageNumber++
                         viewModel.fetchNextPage(notificationPageNumber, NOTIFICATION_PAGE_SIZE)
-
-//                        val nextNotificationList =
-//                            dao.selectLastNotificationsPerChatroom(
-//                                notificationPageNumber,
-//                                NOTIFICATION_PAGE_SIZE
-//                            )
-//
-
-//                        observer = Observer {
-//                            notificationAdapter.update(it)
-//                        }
-//                        liveNotificationList.observe(thisInstance, observer)
                     }
 
                 }
@@ -188,11 +173,6 @@ class MainActivity : AppCompatActivity() {
             if (Intent.ACTION_SCREEN_OFF == intent?.action) {
                 finish()
             }
-//            } else if (CustomNotificationListenerService.ACTION_NAME == intent?.action) {
-//                if (notificationAdapter == null) setAdapter()
-//                else updateAdapter()
-//                tvEmptyNotice.visibility = TextView.INVISIBLE
-//            }
         }
     }
 }

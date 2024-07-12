@@ -3,8 +3,8 @@ package com.fhdufhdu.noticap.ui.main
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.fhdufhdu.noticap.noti.manager.v3.KakaoNotificationDao
-import com.fhdufhdu.noticap.noti.manager.v3.KakaoNotificationPerChatroom
+import com.fhdufhdu.noticap.notification.room.KakaoNotificationDao
+import com.fhdufhdu.noticap.notification.room.projections.KakaoNotificationPerChatroom
 import com.fhdufhdu.noticap.util.CoroutineManager
 
 class KakaoNotificationPerChatroomViewModel(private val dao: KakaoNotificationDao) : ViewModel() {

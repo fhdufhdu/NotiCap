@@ -1,9 +1,12 @@
-package com.fhdufhdu.noticap.noti.manager.v3
+package com.fhdufhdu.noticap.notification.room
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import com.fhdufhdu.noticap.notification.room.entities.KakaoNotificationEntity
+import com.fhdufhdu.noticap.notification.room.projections.KakaoNotificationPerChatroom
+import com.fhdufhdu.noticap.notification.room.projections.KakaoUnreadNotification
 
 @Dao
 interface KakaoNotificationDao {
@@ -32,7 +35,7 @@ interface KakaoNotificationDao {
     fun count(): Int
 
     @Query("select * from Notification where chatroom_name = :chatroomName order by time desc limit :pageSize offset :pageNumber * :pageSize")
-    fun selectMany(chatroomName: String, pageNumber: Int, pageSize: Int): List<KakaoNotification>
+    fun selectMany(chatroomName: String, pageNumber: Int, pageSize: Int): List<KakaoNotificationEntity>
 
     @Query("select count(*) from Notification where chatroom_name = :chatroomName")
     fun count(chatroomName: String): Int
@@ -40,11 +43,14 @@ interface KakaoNotificationDao {
     @Query("select chatroom_name, count(*) as unread_count  from Notification where unread = 1 group by chatroom_name order by max(time) desc")
     fun selectUnreadChatrooms(): List<KakaoUnreadNotification>
 
+    @Query("select * from Notification where unread = 1 order by time desc limit 4")
+    fun selectUnreadChats(): List<KakaoNotificationEntity>
+
     @Query("select not(count(*)) from Notification")
     fun isEmpty(): LiveData<Boolean>
 
     @Insert
-    fun insertNotification(vararg kakaoNotifications: KakaoNotification)
+    fun insertNotification(vararg kakaoNotifications: KakaoNotificationEntity)
 
     @Query("update Notification set unread = 0 where unread = 1 and chatroom_name = :chatroomName")
     fun updateRead(chatroomName: String)
@@ -54,5 +60,5 @@ interface KakaoNotificationDao {
     fun deleteOne(chatroomName: String)
 
     @Query("update Notification set do_run_animation = 0 where id = :id")
-    fun updateDoRunAnimation(id: Long)
+    fun updateDoRunAnimation(id: String)
 }

@@ -1,12 +1,12 @@
-package com.fhdufhdu.noticap.noti.manager.v3
+package com.fhdufhdu.noticap.notification.room
 
 import android.content.Context
-import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.fhdufhdu.noticap.notification.room.entities.KakaoNotificationEntity
 
-@Database(entities = [KakaoNotification::class], version = 1)
+@Database(entities = [KakaoNotificationEntity::class], version = 1)
 abstract class KakaoNotificationDatabase : RoomDatabase() {
     abstract fun kakaoNotificationDao(): KakaoNotificationDao
 

@@ -14,21 +14,20 @@ import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.fhdufhdu.noticap.R
-import com.fhdufhdu.noticap.noti.manager.v3.KakaoNotification
-import com.fhdufhdu.noticap.noti.manager.v3.KakaoNotificationDao
-import com.fhdufhdu.noticap.noti.manager.v3.KakaoNotificationDatabase
-import com.fhdufhdu.noticap.noti.manager.v3.MemDB
+import com.fhdufhdu.noticap.notification.manager.MemDB
+import com.fhdufhdu.noticap.notification.room.entities.KakaoNotificationEntity
+import com.fhdufhdu.noticap.notification.room.KakaoNotificationDao
+import com.fhdufhdu.noticap.notification.room.KakaoNotificationDatabase
 import com.fhdufhdu.noticap.util.IconConverter
 import com.fhdufhdu.noticap.util.SharedPreferenceManager
 import com.fhdufhdu.noticap.util.SizeManager
 import com.fhdufhdu.noticap.util.TimeCalculator
 
 
-class NotificationAdapter(applicationContext: Context) :
+class NotificationAdapter :
     RecyclerView.Adapter<NotificationAdapter.ViewHolder>() {
 
-    private var dao: KakaoNotificationDao
-    private var kakaoNotifications: List<KakaoNotification> = ArrayList()
+    private var kakaoNotifications: List<KakaoNotificationEntity> = ArrayList()
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvTitle: TextView = itemView.findViewById(R.id.tv_title)
@@ -38,10 +37,6 @@ class NotificationAdapter(applicationContext: Context) :
         val ivChatroom: ImageView = itemView.findViewById(R.id.iv_chatroom_img)
         val cvReadMark: CardView = itemView.findViewById(R.id.cv_read_mark)
         val cvMain: CardView = itemView.findViewById(R.id.cv_main)
-    }
-
-    init {
-        dao = KakaoNotificationDatabase.getInstance(applicationContext).kakaoNotificationDao()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -98,16 +93,6 @@ class NotificationAdapter(applicationContext: Context) :
             if (notificationData.unread) CardView.VISIBLE else CardView.INVISIBLE
         holder.ivChatroom.setImageIcon(IconConverter.stringToIcon(notificationData.personIcon))
 
-//        if (notificationData.doRunAnimation) {
-//            CoroutineManager.runUI {
-//                delay(500)
-//                setAnimation(holder.itemView)
-//            }
-//            CoroutineManager.run{
-//                delay(1500)
-//                dao.updateDoRunAnimation(notificationData.id)
-//            }
-//        }
     }
 
     private fun setAnimation(viewToAnimate: View) {
@@ -117,7 +102,7 @@ class NotificationAdapter(applicationContext: Context) :
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun update(kakaoNotifications: List<KakaoNotification>) {
+    fun update(kakaoNotifications: List<KakaoNotificationEntity>) {
         this.kakaoNotifications = kakaoNotifications
         notifyDataSetChanged()
     }

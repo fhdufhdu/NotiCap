@@ -1,4 +1,4 @@
-package com.fhdufhdu.noticap.noti.manager.v3
+package com.fhdufhdu.noticap.notification.room.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -6,7 +6,9 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "Notification", indices = [Index(value = ["chatroom_name", "unread", "time"])])
-class KakaoNotification(
+class KakaoNotificationEntity(
+    @PrimaryKey
+    val id: String,
 
     @ColumnInfo(name = "chatroom_name")
     val chatroomName: String,
@@ -28,7 +30,4 @@ class KakaoNotification(
 
     @ColumnInfo(name = "do_run_animation", defaultValue = "true")
     var doRunAnimation: Boolean = true,
-
-    @PrimaryKey(autoGenerate = true)
-    val id: Long = 0,
 )

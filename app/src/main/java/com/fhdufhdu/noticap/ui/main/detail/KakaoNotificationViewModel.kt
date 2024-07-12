@@ -3,14 +3,13 @@ package com.fhdufhdu.noticap.ui.main.detail
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.fhdufhdu.noticap.noti.manager.v3.KakaoNotification
-import com.fhdufhdu.noticap.noti.manager.v3.KakaoNotificationDao
-import com.fhdufhdu.noticap.noti.manager.v3.KakaoNotificationPerChatroom
+import com.fhdufhdu.noticap.notification.room.entities.KakaoNotificationEntity
+import com.fhdufhdu.noticap.notification.room.KakaoNotificationDao
 import com.fhdufhdu.noticap.util.CoroutineManager
 
 class KakaoNotificationViewModel(private val dao: KakaoNotificationDao): ViewModel() {
-    private val _notificationList = MutableLiveData<ArrayList<KakaoNotification>>()
-    val notificationList: LiveData<ArrayList<KakaoNotification>>
+    private val _notificationList = MutableLiveData<ArrayList<KakaoNotificationEntity>>()
+    val notificationList: LiveData<ArrayList<KakaoNotificationEntity>>
         get() = _notificationList
 
     fun fetchFirstPage(chatroomName: String, pageSize: Int) {

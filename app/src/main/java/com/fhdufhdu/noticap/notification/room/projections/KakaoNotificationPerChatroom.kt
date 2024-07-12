@@ -1,4 +1,4 @@
-package com.fhdufhdu.noticap.noti.manager.v3
+package com.fhdufhdu.noticap.notification.room.projections
 
 import androidx.room.ColumnInfo
 
