@@ -7,12 +7,14 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.app.Person
 import androidx.core.graphics.drawable.IconCompat
 import com.fhdufhdu.noticap.R
 import com.fhdufhdu.noticap.notification.room.KakaoNotificationDao
 import com.fhdufhdu.noticap.notification.room.KakaoNotificationDatabase
 import com.fhdufhdu.noticap.notification.room.entities.KakaoNotificationEntity
 import com.fhdufhdu.noticap.ui.main.MainActivity
+import com.fhdufhdu.noticap.util.IconConverter
 
 class KakaoNotificationSender(private val context: Context) {
     private val notificationManager: NotificationManager
@@ -53,7 +55,7 @@ class KakaoNotificationSender(private val context: Context) {
             PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_MUTABLE
         )
 
-        val unreadChats = kakaoNotificationDao.selectUnreadChats()
+        val unreadChats = kakaoNotificationDao.selectUnreadChats().reversed()
 
         if (unreadChats.isEmpty()) {
             notificationManager.cancel(NOTIFICATION_ID)
@@ -63,7 +65,16 @@ class KakaoNotificationSender(private val context: Context) {
         val messages = ArrayList<NotificationCompat.MessagingStyle.Message>()
 
         unreadChats.forEach {
-            messages.add(NotificationCompat.MessagingStyle.Message(it.content, it.time, it.sender))
+            var personBuilder = Person.Builder().setName(it.sender)
+            if (it.personIcon != null) {
+                personBuilder = personBuilder.setIcon(
+                    IconCompat.createFromIcon(
+                        context,
+                        IconConverter.stringToIcon(it.personIcon)!!
+                    )
+                )
+            }
+            messages.add(NotificationCompat.MessagingStyle.Message(it.content, it.time, personBuilder.build()))
         }
 
         var messageStyle = NotificationCompat.MessagingStyle("")
@@ -87,10 +98,10 @@ class KakaoNotificationSender(private val context: Context) {
     fun addAndSendNotification(kakaoNotificationEntity: KakaoNotificationEntity) {
         try {
             kakaoNotificationDao.insertNotification(kakaoNotificationEntity)
+            sendNotification()
         } catch (exception: Exception) {
             Log.e("중복 저장", exception.toString())
         }
-        sendNotification()
     }
 
     fun updateReadStatusAndSendNotification(chatroomName: String) {

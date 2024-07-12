@@ -30,4 +30,10 @@ class KakaoNotificationEntity(
 
     @ColumnInfo(name = "do_run_animation", defaultValue = "true")
     var doRunAnimation: Boolean = true,
-)
+
+
+) {
+    override fun toString(): String {
+        return "KakaoNotificationEntity(id='$id', chatroomName='$chatroomName', sender='$sender', content='$content', time=$time, unread=$unread, doRunAnimation=$doRunAnimation)"
+    }
+}

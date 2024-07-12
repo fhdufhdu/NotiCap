@@ -43,7 +43,6 @@ class CustomNotificationListenerService : NotificationListenerService() {
         val nPackageName = sbn.packageName
         val extras = sbn.notification.extras
 
-        Log.d("package", nPackageName)
         if (nPackageName == "com.kakao.talk") {
             val notificationInfo = getNotificationInfo(sbn.notification, extras) ?: return
             val chatroomName = notificationInfo.first
