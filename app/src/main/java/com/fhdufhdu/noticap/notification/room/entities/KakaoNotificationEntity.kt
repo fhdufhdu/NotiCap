@@ -19,8 +19,8 @@ class KakaoNotificationEntity(
     @ColumnInfo
     val content: String,
 
-    @ColumnInfo(name = "person_icon")
-    val personIcon: String?,
+    @ColumnInfo(name = "person_key")
+    val personKey: String?,
 
     @ColumnInfo
     val time: Long,

@@ -14,12 +14,12 @@ import com.fhdufhdu.noticap.notification.room.KakaoNotificationDao
 import com.fhdufhdu.noticap.notification.room.KakaoNotificationDatabase
 import com.fhdufhdu.noticap.notification.room.entities.KakaoNotificationEntity
 import com.fhdufhdu.noticap.ui.main.MainActivity
-import com.fhdufhdu.noticap.util.IconConverter
 
 class KakaoNotificationSender(private val context: Context) {
     private val notificationManager: NotificationManager
     private val kakaoNotificationDao: KakaoNotificationDao =
         KakaoNotificationDatabase.getInstance(context).kakaoNotificationDao()
+    private val memDB: MemDB = MemDB.getInstance()
 
     companion object {
         const val NOTIFICATION_ID = 1026
@@ -66,15 +66,18 @@ class KakaoNotificationSender(private val context: Context) {
 
         unreadChats.forEach {
             var personBuilder = Person.Builder().setName(it.sender)
-            if (it.personIcon != null) {
+            if (it.personKey != null && memDB.personMap.containsKey(it.personKey)) {
                 personBuilder = personBuilder.setIcon(
-                    IconCompat.createFromIcon(
-                        context,
-                        IconConverter.stringToIcon(it.personIcon)!!
-                    )
+                    memDB.personMap[it.personKey]?.icon
                 )
             }
-            messages.add(NotificationCompat.MessagingStyle.Message(it.content, it.time, personBuilder.build()))
+            messages.add(
+                NotificationCompat.MessagingStyle.Message(
+                    it.content,
+                    it.time,
+                    personBuilder.build()
+                )
+            )
         }
 
         var messageStyle = NotificationCompat.MessagingStyle("")

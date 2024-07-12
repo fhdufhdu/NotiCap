@@ -25,6 +25,7 @@ class NotificationAdapter :
     RecyclerView.Adapter<NotificationAdapter.ViewHolder>() {
 
     private var kakaoNotifications: List<KakaoNotificationEntity> = ArrayList()
+    private val memDB: MemDB = MemDB.getInstance()
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvTitle: TextView = itemView.findViewById(R.id.tv_title)
@@ -88,7 +89,8 @@ class NotificationAdapter :
         )
         holder.cvReadMark.visibility =
             if (notificationData.unread) CardView.VISIBLE else CardView.INVISIBLE
-        holder.ivChatroom.setImageIcon(IconConverter.stringToIcon(notificationData.personIcon))
+        if (notificationData.personKey != null && memDB.personMap.containsKey(notificationData.personKey))
+            holder.ivChatroom.setImageIcon(memDB.personMap[notificationData.personKey]?.icon?.toIcon(holder.itemView.context))
 
     }
 

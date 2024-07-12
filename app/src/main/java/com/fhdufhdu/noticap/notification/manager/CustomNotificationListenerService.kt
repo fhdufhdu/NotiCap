@@ -7,6 +7,7 @@ import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.app.Person
 import com.fhdufhdu.noticap.notification.room.entities.KakaoNotificationEntity
 import com.fhdufhdu.noticap.util.CoroutineManager
 import com.fhdufhdu.noticap.util.IconConverter
@@ -27,8 +28,7 @@ class CustomNotificationListenerService : NotificationListenerService() {
         val extras = sbn.notification.extras
 
         if (nPackageName == "com.kakao.talk") {
-            val notificationInfo = getNotificationInfo(sbn.notification, extras) ?: return
-            val chatroomName = notificationInfo.first
+            val chatroomName = getChatroomName(extras) ?: return
 
             CoroutineManager.run {
                 kakaoNotificationSender?.updateReadStatusAndSendNotification(chatroomName)
@@ -41,50 +41,60 @@ class CustomNotificationListenerService : NotificationListenerService() {
         initNotificationSender()
 
         val nPackageName = sbn.packageName
+        val notification = sbn.notification
         val extras = sbn.notification.extras
 
         if (nPackageName == "com.kakao.talk") {
-            val notificationInfo = getNotificationInfo(sbn.notification, extras) ?: return
-            val chatroomName = notificationInfo.first
-            val notificationData = notificationInfo.second
+            val chatroomName = getChatroomName(extras)?:return
+            val kakaoNotificationEntity = getKakaoNotificationEntity(notification, extras)?:return
+            val person = getPerson(notification)
 
-            MemDB.getInstance().pendingIntentMap[chatroomName] = sbn.notification.contentIntent
+            val memDB = MemDB.getInstance()
+            if (!memDB.pendingIntentMap.containsKey(chatroomName))
+                memDB.pendingIntentMap[chatroomName] = notification.contentIntent
+            if(person != null && person.key != null && !memDB.personMap.containsKey(person.key))
+                memDB.personMap[person.key!!] = person
 
             CoroutineManager.run {
-                kakaoNotificationSender?.addAndSendNotification(notificationData)
+                kakaoNotificationSender?.addAndSendNotification(kakaoNotificationEntity)
             }
         }
     }
 
-    private fun getNotificationInfo(
+    private fun getKakaoNotificationEntity(
         notification: Notification,
         extras: Bundle
-    ): Pair<String, KakaoNotificationEntity>? {
+    ): KakaoNotificationEntity? {
         val title = extras.getString(Notification.EXTRA_TITLE) ?: return null
         val text = extras.getString(Notification.EXTRA_TEXT) ?: return null
-        val subText = extras.getString(Notification.EXTRA_SUB_TEXT)
-        val personList =
-            NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification(notification)?.messages
-        var personIcon: Icon? = null
-        if (personList != null && personList.size > 0) {
-            personIcon = personList[0].person?.icon?.toIcon(this)
-        }
+        val personKey: String? = getPerson(notification)?.key
         val time = notification.`when`
         val pendingIntent = notification.contentIntent
-        val chatroomName = subText ?: title
+        val chatroomName = getChatroomName(extras)?: return null
 
         val pendingIntentMap = MemDB.getInstance().pendingIntentMap
         pendingIntentMap[chatroomName] = pendingIntent
 
-        val kakaoNotification = KakaoNotificationEntity(
+        return KakaoNotificationEntity(
             "${chatroomName}_${time}",
             chatroomName,
             title,
             text,
-            IconConverter.iconToString(personIcon, this),
+            personKey,
             time,
         )
+    }
 
-        return Pair(chatroomName, kakaoNotification)
+    private fun getChatroomName(extras: Bundle):String? {
+        val title = extras.getString(Notification.EXTRA_TITLE) ?: return null
+        val subText = extras.getString(Notification.EXTRA_SUB_TEXT)
+        return subText ?: title
+    }
+
+    private fun getPerson(notification: Notification,): Person? {
+        val personList =
+            NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification(notification)?.messages
+
+        return personList?.get(0)?.person
     }
 }
