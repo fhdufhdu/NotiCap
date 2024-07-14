@@ -90,7 +90,7 @@ class MainActivity : AppCompatActivity() {
         viewModel = ViewModelProvider(this, KakaoNotificationPerChatroomViewModelFactory(dao)).get(
             KakaoNotificationPerChatroomViewModel::class.java
         )
-        viewModel.fetchFirstPage(NOTIFICATION_PAGE_SIZE)
+//        viewModel.fetchFirstPage(NOTIFICATION_PAGE_SIZE)
 
         var observer = Observer<List<KakaoNotificationPerChatroom>> {
             notificationAdapter.update(it)
@@ -107,7 +107,6 @@ class MainActivity : AppCompatActivity() {
                 notificationAdapter.notifyDataSetChanged()
             }
 
-        val thisInstance = this
         binding.rvMainNotification.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
@@ -133,6 +132,11 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         prefs.registerOnSharedPreferenceChangeListener(prefsListener)
+        viewModel.fetchFirstPage((notificationPageNumber + 1) * NOTIFICATION_PAGE_SIZE )
+    }
+
+    override fun onPause() {
+        super.onPause()
     }
 
     private fun isNotiPermissionGranted(): Boolean {

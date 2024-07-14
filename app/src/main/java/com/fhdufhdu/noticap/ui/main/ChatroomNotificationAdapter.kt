@@ -14,6 +14,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.fhdufhdu.noticap.R
+import com.fhdufhdu.noticap.notification.manager.MemDB
 import com.fhdufhdu.noticap.notification.room.KakaoNotificationDao
 import com.fhdufhdu.noticap.notification.room.KakaoNotificationDatabase
 import com.fhdufhdu.noticap.notification.room.projections.KakaoNotificationPerChatroom
@@ -30,6 +31,7 @@ class ChatroomNotificationAdapter(applicationContext: Context) :
 
     private val dao: KakaoNotificationDao
     private var kakaoNotificationsPerChatroom: List<KakaoNotificationPerChatroom> = ArrayList()
+    private val memDB: MemDB = MemDB.getInstance()
 
     init {
         dao = KakaoNotificationDatabase.getInstance(applicationContext).kakaoNotificationDao()
@@ -104,7 +106,9 @@ class ChatroomNotificationAdapter(applicationContext: Context) :
         } $unreadStr".also { holder.tvTime.text = it }
         holder.cvReadMark.visibility =
             if (notificationData.unread) CardView.VISIBLE else CardView.INVISIBLE
-        holder.ivChatroom.setImageIcon(IconConverter.stringToIcon(notificationData.personIcon))
+        val icon = memDB.getIconCompat(holder.itemView.context, notificationData.personKey, notificationData.personIcon)
+        if (icon != null)
+            holder.ivChatroom.setImageIcon(icon.toIcon(holder.itemView.context))
 
 //        if (notificationData.doRunAnimation) {
 //            setAnimation(holder.itemView)

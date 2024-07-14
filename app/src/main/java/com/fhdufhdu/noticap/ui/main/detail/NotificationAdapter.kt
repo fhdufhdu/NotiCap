@@ -89,8 +89,9 @@ class NotificationAdapter :
         )
         holder.cvReadMark.visibility =
             if (notificationData.unread) CardView.VISIBLE else CardView.INVISIBLE
-        if (notificationData.personKey != null && memDB.personMap.containsKey(notificationData.personKey))
-            holder.ivChatroom.setImageIcon(memDB.personMap[notificationData.personKey]?.icon?.toIcon(holder.itemView.context))
+        val icon = memDB.getIconCompat(holder.itemView.context, notificationData.personKey, notificationData.personIcon)
+        if (icon != null)
+            holder.ivChatroom.setImageIcon(icon.toIcon(holder.itemView.context))
 
     }
 

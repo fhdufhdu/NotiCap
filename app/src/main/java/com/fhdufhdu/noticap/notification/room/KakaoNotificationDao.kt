@@ -54,7 +54,7 @@ interface KakaoNotificationDao {
     @Query("select chatroom_name, count(*) as unread_count  from Notification where unread = 1 group by chatroom_name order by max(time) desc")
     fun selectUnreadChatrooms(): List<KakaoUnreadNotification>
 
-    @Query("select * from Notification where unread = 1 order by time desc limit 4")
+    @Query("select * from Notification where unread = 1 order by time desc limit 20")
     fun selectUnreadChats(): List<KakaoNotificationEntity>
 
     @Query("select not(count(*)) from Notification")

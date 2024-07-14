@@ -2,10 +2,14 @@ package com.fhdufhdu.noticap.notification.room.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "Notification", indices = [Index(value = ["chatroom_name", "unread", "time"])])
+@Entity(
+    tableName = "Notification",
+    indices = [Index(value = ["chatroom_name", "unread", "time"])],
+)
 class KakaoNotificationEntity(
     @PrimaryKey
     val id: String,
@@ -22,6 +26,9 @@ class KakaoNotificationEntity(
     @ColumnInfo(name = "person_key")
     val personKey: String?,
 
+    @ColumnInfo(name = "person_icon")
+    val personIcon: String?,
+
     @ColumnInfo
     val time: Long,
 
@@ -32,7 +39,7 @@ class KakaoNotificationEntity(
     var doRunAnimation: Boolean = true,
 
 
-) {
+    ) {
     override fun toString(): String {
         return "KakaoNotificationEntity(id='$id', chatroomName='$chatroomName', sender='$sender', content='$content', time=$time, unread=$unread, doRunAnimation=$doRunAnimation)"
     }

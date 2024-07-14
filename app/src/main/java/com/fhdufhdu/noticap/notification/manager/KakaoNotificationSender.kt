@@ -14,6 +14,7 @@ import com.fhdufhdu.noticap.notification.room.KakaoNotificationDao
 import com.fhdufhdu.noticap.notification.room.KakaoNotificationDatabase
 import com.fhdufhdu.noticap.notification.room.entities.KakaoNotificationEntity
 import com.fhdufhdu.noticap.ui.main.MainActivity
+import java.lang.StringBuilder
 
 class KakaoNotificationSender(private val context: Context) {
     private val notificationManager: NotificationManager
@@ -44,46 +45,66 @@ class KakaoNotificationSender(private val context: Context) {
         notificationManager.createNotificationChannel(channel)
     }
 
-
-    private fun sendNotification() {
+    /**
+     * 알림에 쓸 PendingIntent를 제작합니다.
+     *
+     * @param context PendingIntent 제작에 사용할 Context
+     * @return MainActivity 로 이동하게 하는 PendingIntent
+     */
+    private fun createNotificationPendingIntent(context: Context): PendingIntent {
         val intent = Intent(context, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
 
-        val pendingIntent: PendingIntent = PendingIntent.getActivity(
+        return PendingIntent.getActivity(
             context, System.currentTimeMillis().toInt(), intent,
             PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_MUTABLE
         )
+    }
 
-        val unreadChats = kakaoNotificationDao.selectUnreadChats().reversed()
+    /**
+     * 읽지 않은 대화를 알림에 사용할 수 있는 객체로 변환합니다.
+     *
+     * @param unreadChats 읽지 않은 대화 리스트
+     * @return List<NotificationCompat.MessagingStyle.Message>를 반환합니다. 이 값은 시간 기준으로 오름차순으로 정렬되어 반환됩니다.
+     */
+    private fun makeNotificationMessages(unreadChats: List<KakaoNotificationEntity>): List<NotificationCompat.MessagingStyle.Message> {
+        val sortedUnreadChats = unreadChats.sortedBy { it.time }
+        val unreadChatNotificationMessages = sortedUnreadChats.map {
+            val name = StringBuilder(it.sender)
+            if (it.sender != it.chatroomName) {
+                name.append("(")
+                name.append(it.chatroomName)
+                name.append(")")
+            }
+            val personBuilder = Person.Builder().setName(name)
+                .setIcon(memDB.getIconCompat(context, it.personKey, it.personIcon))
+
+            return@map NotificationCompat.MessagingStyle.Message(
+                it.content,
+                it.time,
+                personBuilder.build()
+            )
+        }
+
+        return unreadChatNotificationMessages
+    }
+
+    private fun sendNotification() {
+        val unreadChats = kakaoNotificationDao.selectUnreadChats()
 
         if (unreadChats.isEmpty()) {
             notificationManager.cancel(NOTIFICATION_ID)
             return
         }
 
-        val messages = ArrayList<NotificationCompat.MessagingStyle.Message>()
-
-        unreadChats.forEach {
-            var personBuilder = Person.Builder().setName(it.sender)
-            if (it.personKey != null && memDB.personMap.containsKey(it.personKey)) {
-                personBuilder = personBuilder.setIcon(
-                    memDB.personMap[it.personKey]?.icon
-                )
-            }
-            messages.add(
-                NotificationCompat.MessagingStyle.Message(
-                    it.content,
-                    it.time,
-                    personBuilder.build()
-                )
-            )
-        }
+        val unreadChatsNotificationMessages = makeNotificationMessages(unreadChats)
 
         var messageStyle = NotificationCompat.MessagingStyle("")
-        messages.forEach {
+        unreadChatsNotificationMessages.forEach {
             messageStyle = messageStyle.addMessage(it)
         }
+
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(
                 IconCompat.createWithResource(
@@ -94,7 +115,7 @@ class KakaoNotificationSender(private val context: Context) {
             .setStyle(messageStyle)
             .setCategory(NotificationCompat.CATEGORY_MESSAGE)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setContentIntent(pendingIntent)
+            .setContentIntent(createNotificationPendingIntent(context))
         notificationManager.notify(NOTIFICATION_ID, builder.build())
     }
 

@@ -47,13 +47,10 @@ class CustomNotificationListenerService : NotificationListenerService() {
         if (nPackageName == "com.kakao.talk") {
             val chatroomName = getChatroomName(extras)?:return
             val kakaoNotificationEntity = getKakaoNotificationEntity(notification, extras)?:return
-            val person = getPerson(notification)
 
             val memDB = MemDB.getInstance()
             if (!memDB.pendingIntentMap.containsKey(chatroomName))
                 memDB.pendingIntentMap[chatroomName] = notification.contentIntent
-            if(person != null && person.key != null && !memDB.personMap.containsKey(person.key))
-                memDB.personMap[person.key!!] = person
 
             CoroutineManager.run {
                 kakaoNotificationSender?.addAndSendNotification(kakaoNotificationEntity)
@@ -67,7 +64,9 @@ class CustomNotificationListenerService : NotificationListenerService() {
     ): KakaoNotificationEntity? {
         val title = extras.getString(Notification.EXTRA_TITLE) ?: return null
         val text = extras.getString(Notification.EXTRA_TEXT) ?: return null
-        val personKey: String? = getPerson(notification)?.key
+        val person = getPerson(notification)
+        val personKey: String? = person?.key
+        val personIcon: String? = IconConverter.iconToString(person?.icon?.toIcon(this), this)
         val time = notification.`when`
         val pendingIntent = notification.contentIntent
         val chatroomName = getChatroomName(extras)?: return null
@@ -81,6 +80,7 @@ class CustomNotificationListenerService : NotificationListenerService() {
             title,
             text,
             personKey,
+            personIcon,
             time,
         )
     }
