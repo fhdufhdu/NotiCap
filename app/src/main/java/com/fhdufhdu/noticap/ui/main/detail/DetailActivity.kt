@@ -22,6 +22,7 @@ import com.fhdufhdu.noticap.notification.room.KakaoNotificationDatabase
 import com.fhdufhdu.noticap.notification.room.entities.KakaoNotificationEntity
 import com.fhdufhdu.noticap.util.CoroutineManager
 
+private const val NOTIFICATION_PAGE_SIZE: Int = 20
 
 class DetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityNotificationBinding
@@ -31,7 +32,6 @@ class DetailActivity : AppCompatActivity() {
     private lateinit var dao: KakaoNotificationDao
     private lateinit var viewModel: KakaoNotificationViewModel
     private var chatroomName: String = ""
-    private var NOTIFICATION_PAGE_SIZE: Int = 20
     private var notificationPageNumber = 0
     private var kakaoNotificationSender: KakaoNotificationSender? = null
 
@@ -46,8 +46,8 @@ class DetailActivity : AppCompatActivity() {
         } else {
             window.addFlags(
                 WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
-                        WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                        WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON,
             )
         }
 
@@ -66,40 +66,47 @@ class DetailActivity : AppCompatActivity() {
         notificationAdapter = NotificationAdapter()
         binding.rvNotification.adapter = notificationAdapter
 
-        viewModel = ViewModelProvider(this, KakaoNotificationViewModelFactory(dao)).get(
-            KakaoNotificationViewModel::class.java
-        )
+        viewModel =
+            ViewModelProvider(this, KakaoNotificationViewModelFactory(dao)).get(
+                KakaoNotificationViewModel::class.java,
+            )
         viewModel.fetchFirstPage(chatroomName, NOTIFICATION_PAGE_SIZE)
 
-        var observer = Observer<List<KakaoNotificationEntity>> {
-            notificationAdapter.update(it)
-        }
+        var observer =
+            Observer<List<KakaoNotificationEntity>> {
+                notificationAdapter.update(it)
+            }
         viewModel.notificationList.observe(this, observer)
 
-        binding.rvNotification.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                // 마지막 스크롤된 항목 위치
-                val lastVisibleItemPosition =
-                    (recyclerView.layoutManager as LinearLayoutManager?)!!.findLastCompletelyVisibleItemPosition()
-                // 항목 전체 개수
-                val itemTotalCount = recyclerView.adapter!!.itemCount - 1
-                if (lastVisibleItemPosition == itemTotalCount) {
-                    val notificationCount =
-                        CoroutineManager.runSync { dao.count(chatroomName) }
+        binding.rvNotification.addOnScrollListener(
+            object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(
+                    recyclerView: RecyclerView,
+                    dx: Int,
+                    dy: Int,
+                ) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    // 마지막 스크롤된 항목 위치
+                    val lastVisibleItemPosition =
+                        (recyclerView.layoutManager as LinearLayoutManager?)!!.findLastCompletelyVisibleItemPosition()
+                    // 항목 전체 개수
+                    val itemTotalCount = recyclerView.adapter!!.itemCount - 1
+                    if (lastVisibleItemPosition == itemTotalCount) {
+                        val notificationCount =
+                            CoroutineManager.runSync { dao.count(chatroomName) }
 
-                    if ((notificationPageNumber + 1) * NOTIFICATION_PAGE_SIZE < notificationCount) {
-                        notificationPageNumber++
-                        viewModel.fetchNextPage(
-                            chatroomName,
-                            notificationPageNumber,
-                            NOTIFICATION_PAGE_SIZE
-                        )
+                        if ((notificationPageNumber + 1) * NOTIFICATION_PAGE_SIZE < notificationCount) {
+                            notificationPageNumber++
+                            viewModel.fetchNextPage(
+                                chatroomName,
+                                notificationPageNumber,
+                                NOTIFICATION_PAGE_SIZE,
+                            )
+                        }
                     }
-
                 }
-            }
-        })
+            },
+        )
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
         prefsListener =
@@ -126,11 +133,13 @@ class DetailActivity : AppCompatActivity() {
     }
 
     inner class ScreenOffReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
+        override fun onReceive(
+            context: Context?,
+            intent: Intent?,
+        ) {
             if (Intent.ACTION_SCREEN_OFF == intent?.action) {
                 finish()
             }
         }
     }
-
 }

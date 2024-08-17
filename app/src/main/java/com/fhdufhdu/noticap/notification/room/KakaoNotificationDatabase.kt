@@ -12,16 +12,19 @@ abstract class KakaoNotificationDatabase : RoomDatabase() {
 
     companion object {
         private var instance: KakaoNotificationDatabase? = null
+
         fun getInstance(applicationContext: Context): KakaoNotificationDatabase {
             return instance ?: synchronized(this) {
                 if (instance == null) {
-                    instance = Room.databaseBuilder(
-                        applicationContext,
-                        KakaoNotificationDatabase::class.java, "database"
-                    ).build()
+                    instance =
+                        Room
+                            .databaseBuilder(
+                                applicationContext,
+                                KakaoNotificationDatabase::class.java,
+                                "database",
+                            ).build()
                 }
                 return instance!!
-
             }
         }
     }

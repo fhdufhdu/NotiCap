@@ -7,7 +7,9 @@ import com.fhdufhdu.noticap.notification.room.KakaoNotificationDao
 import com.fhdufhdu.noticap.notification.room.projections.KakaoNotificationPerChatroom
 import com.fhdufhdu.noticap.util.CoroutineManager
 
-class KakaoNotificationPerChatroomViewModel(private val dao: KakaoNotificationDao) : ViewModel() {
+class KakaoNotificationPerChatroomViewModel(
+    private val dao: KakaoNotificationDao,
+) : ViewModel() {
     private val _notificationList = MutableLiveData<ArrayList<KakaoNotificationPerChatroom>>()
     val notificationList: LiveData<ArrayList<KakaoNotificationPerChatroom>>
         get() = _notificationList
@@ -19,7 +21,10 @@ class KakaoNotificationPerChatroomViewModel(private val dao: KakaoNotificationDa
         }
     }
 
-    fun fetchNextPage(pageNumber: Int, pageSize: Int) {
+    fun fetchNextPage(
+        pageNumber: Int,
+        pageSize: Int,
+    ) {
         val prevList = _notificationList.value ?: return
         CoroutineManager.runSync {
             val nextPage = dao.selectLastNotificationsPerChatroom(pageNumber, pageSize)

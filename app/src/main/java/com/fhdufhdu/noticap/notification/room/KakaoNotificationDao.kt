@@ -24,11 +24,11 @@ interface KakaoNotificationDao {
             order by n1.max_time desc
             limit :pageSize
             offset :pageNumber * :pageSize
-        """
+        """,
     )
     fun selectLastNotificationsPerChatroom(
         pageNumber: Int,
-        pageSize: Int
+        pageSize: Int,
     ): List<KakaoNotificationPerChatroom>
 
     @Query(
@@ -37,21 +37,25 @@ interface KakaoNotificationDao {
             from (select chatroom_name
                     from Notification
                     group by chatroom_name) n1
-        """
+        """,
     )
     fun count(): Int
 
-    @Query("select * from Notification where chatroom_name = :chatroomName order by time desc limit :pageSize offset :pageNumber * :pageSize")
+    @Query(
+        "select * from Notification where chatroom_name = :chatroomName order by time desc limit :pageSize offset :pageNumber * :pageSize",
+    )
     fun selectMany(
         chatroomName: String,
         pageNumber: Int,
-        pageSize: Int
+        pageSize: Int,
     ): List<KakaoNotificationEntity>
 
     @Query("select count(*) from Notification where chatroom_name = :chatroomName")
     fun count(chatroomName: String): Int
 
-    @Query("select chatroom_name, count(*) as unread_count  from Notification where unread = 1 group by chatroom_name order by max(time) desc")
+    @Query(
+        "select chatroom_name, count(*) as unread_count  from Notification where unread = 1 group by chatroom_name order by max(time) desc",
+    )
     fun selectUnreadChatrooms(): List<KakaoUnreadNotification>
 
     @Query("select * from Notification where unread = 1 order by time desc limit 20")
@@ -65,7 +69,6 @@ interface KakaoNotificationDao {
 
     @Query("update Notification set unread = 0 where unread = 1 and chatroom_name = :chatroomName")
     fun updateRead(chatroomName: String)
-
 
     @Query("delete from Notification where chatroom_name = :chatroomName")
     fun deleteOne(chatroomName: String)

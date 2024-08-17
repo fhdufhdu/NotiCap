@@ -16,7 +16,9 @@ import com.fhdufhdu.noticap.notification.room.entities.KakaoNotificationEntity
 import com.fhdufhdu.noticap.ui.main.MainActivity
 import java.lang.StringBuilder
 
-class KakaoNotificationSender(private val context: Context) {
+class KakaoNotificationSender(
+    private val context: Context,
+) {
     private val notificationManager: NotificationManager
     private val kakaoNotificationDao: KakaoNotificationDao =
         KakaoNotificationDatabase.getInstance(context).kakaoNotificationDao()
@@ -32,13 +34,14 @@ class KakaoNotificationSender(private val context: Context) {
         val name = context.getString(R.string.channel_name)
         val descriptionText = context.getString(R.string.channel_description)
         val importance = NotificationManager.IMPORTANCE_LOW
-        val channel = NotificationChannel(
-            CHANNEL_ID,
-            name,
-            importance
-        ).apply {
-            description = descriptionText
-        }
+        val channel =
+            NotificationChannel(
+                CHANNEL_ID,
+                name,
+                importance,
+            ).apply {
+                description = descriptionText
+            }
 
         notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -57,8 +60,10 @@ class KakaoNotificationSender(private val context: Context) {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
 
         return PendingIntent.getActivity(
-            context, System.currentTimeMillis().toInt(), intent,
-            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_MUTABLE
+            context,
+            System.currentTimeMillis().toInt(),
+            intent,
+            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_MUTABLE,
         )
     }
 
@@ -70,22 +75,26 @@ class KakaoNotificationSender(private val context: Context) {
      */
     private fun makeNotificationMessages(unreadChats: List<KakaoNotificationEntity>): List<NotificationCompat.MessagingStyle.Message> {
         val sortedUnreadChats = unreadChats.sortedBy { it.time }
-        val unreadChatNotificationMessages = sortedUnreadChats.map {
-            val name = StringBuilder(it.sender)
-            if (it.sender != it.chatroomName) {
-                name.append("(")
-                name.append(it.chatroomName)
-                name.append(")")
-            }
-            val personBuilder = Person.Builder().setName(name)
-                .setIcon(memDB.getIconCompat(context, it.personKey, it.personIcon))
+        val unreadChatNotificationMessages =
+            sortedUnreadChats.map {
+                val name = StringBuilder(it.sender)
+                if (it.sender != it.chatroomName) {
+                    name.append("(")
+                    name.append(it.chatroomName)
+                    name.append(")")
+                }
+                val personBuilder =
+                    Person
+                        .Builder()
+                        .setName(name)
+                        .setIcon(memDB.getIconCompat(context, it.personKey, it.personIcon))
 
-            return@map NotificationCompat.MessagingStyle.Message(
-                it.content,
-                it.time,
-                personBuilder.build()
-            )
-        }
+                return@map NotificationCompat.MessagingStyle.Message(
+                    it.content,
+                    it.time,
+                    personBuilder.build(),
+                )
+            }
 
         return unreadChatNotificationMessages
     }
@@ -100,22 +109,26 @@ class KakaoNotificationSender(private val context: Context) {
 
         val unreadChatsNotificationMessages = makeNotificationMessages(unreadChats)
 
-        var messageStyle = NotificationCompat.MessagingStyle("")
+        var messageStyle = NotificationCompat.MessagingStyle(Person.Builder().setName("me").build())
         unreadChatsNotificationMessages.forEach {
             messageStyle = messageStyle.addMessage(it)
         }
 
-        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(
-                IconCompat.createWithResource(
-                    context,
-                    R.drawable.ic_notification
-                )
-            )
-            .setStyle(messageStyle)
-            .setCategory(NotificationCompat.CATEGORY_MESSAGE)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setContentIntent(createNotificationPendingIntent(context))
+        val builder =
+            NotificationCompat
+                .Builder(context, CHANNEL_ID)
+                .setSmallIcon(
+                    IconCompat.createWithResource(
+                        context,
+                        R.drawable.ic_notification,
+                    ),
+                ).setContentTitle("읽지 않은 카카오톡 알림")
+                .setContentText("${unreadChatsNotificationMessages.size} 건의 카카오톡 알림을 읽지 않았습니다.")
+                .setStyle(messageStyle)
+                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setContentIntent(createNotificationPendingIntent(context))
+                .setWhen(unreadChatsNotificationMessages.last().timestamp + 1)
         notificationManager.notify(NOTIFICATION_ID, builder.build())
     }
 
@@ -132,6 +145,4 @@ class KakaoNotificationSender(private val context: Context) {
         kakaoNotificationDao.updateRead(chatroomName)
         sendNotification()
     }
-
-
 }
