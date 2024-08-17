@@ -20,15 +20,13 @@ import com.fhdufhdu.noticap.notification.room.KakaoNotificationDatabase
 import com.fhdufhdu.noticap.notification.room.projections.KakaoNotificationPerChatroom
 import com.fhdufhdu.noticap.ui.main.detail.DetailActivity
 import com.fhdufhdu.noticap.util.CoroutineManager
-import com.fhdufhdu.noticap.util.IconConverter
 import com.fhdufhdu.noticap.util.SharedPreferenceManager
 import com.fhdufhdu.noticap.util.SizeManager
 import com.fhdufhdu.noticap.util.TimeCalculator
 
-
-class ChatroomNotificationAdapter(applicationContext: Context) :
-    RecyclerView.Adapter<ChatroomNotificationAdapter.ViewHolder>() {
-
+class ChatroomNotificationAdapter(
+    applicationContext: Context,
+) : RecyclerView.Adapter<ChatroomNotificationAdapter.ViewHolder>() {
     private val dao: KakaoNotificationDao
     private var kakaoNotificationsPerChatroom: List<KakaoNotificationPerChatroom> = ArrayList()
     private val memDB: MemDB = MemDB.getInstance()
@@ -37,7 +35,9 @@ class ChatroomNotificationAdapter(applicationContext: Context) :
         dao = KakaoNotificationDatabase.getInstance(applicationContext).kakaoNotificationDao()
     }
 
-    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class ViewHolder(
+        itemView: View,
+    ) : RecyclerView.ViewHolder(itemView) {
         val tvTitle: TextView = itemView.findViewById(R.id.tv_title)
         val tvSubText: TextView = itemView.findViewById(R.id.tv_sub_text)
         val tvText: TextView = itemView.findViewById(R.id.tv_text)
@@ -46,7 +46,10 @@ class ChatroomNotificationAdapter(applicationContext: Context) :
         val cvReadMark: CardView = itemView.findViewById(R.id.cv_read_mark)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): ViewHolder {
         val view =
             LayoutInflater.from(parent.context).inflate(R.layout.notification_item, parent, false)
         val viewHolder = ViewHolder(view)
@@ -62,12 +65,13 @@ class ChatroomNotificationAdapter(applicationContext: Context) :
         return viewHolder
     }
 
-    override fun getItemCount(): Int {
-        return kakaoNotificationsPerChatroom.size
-    }
+    override fun getItemCount(): Int = kakaoNotificationsPerChatroom.size
 
     @SuppressLint("SimpleDateFormat")
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: ViewHolder,
+        position: Int,
+    ) {
         val notificationData = kakaoNotificationsPerChatroom[position]
         val context = holder.itemView.context
 
@@ -78,16 +82,16 @@ class ChatroomNotificationAdapter(applicationContext: Context) :
         }
 
         holder.itemView.setOnLongClickListener {
-            AlertDialog.Builder(it.context)
+            AlertDialog
+                .Builder(it.context)
                 .setMessage("채팅방을 삭제하시겠습니까?")
                 .setPositiveButton("확인") { _, _ ->
                     CoroutineManager.run {
                         dao.deleteOne(
-                            notificationData.chatroomName
+                            notificationData.chatroomName,
                         )
                     }
-                }
-                .setNegativeButton("취소", null)
+                }.setNegativeButton("취소", null)
                 .show()
             true
         }
@@ -101,14 +105,15 @@ class ChatroomNotificationAdapter(applicationContext: Context) :
         "${
             TimeCalculator.toString(
                 SharedPreferenceManager.getTimeFormatType(context),
-                notificationData.time
+                notificationData.time,
             )
         } $unreadStr".also { holder.tvTime.text = it }
         holder.cvReadMark.visibility =
             if (notificationData.unread) CardView.VISIBLE else CardView.INVISIBLE
-        val icon = memDB.getIconCompat(holder.itemView.context, notificationData.personKey, notificationData.personIcon)
-        if (icon != null)
+        val icon = memDB.getOrSaveIconCompat(holder.itemView.context, notificationData.personKey, notificationData.personIcon)
+        if (icon != null) {
             holder.ivChatroom.setImageIcon(icon.toIcon(holder.itemView.context))
+        }
 
 //        if (notificationData.doRunAnimation) {
 //            setAnimation(holder.itemView)
@@ -123,7 +128,7 @@ class ChatroomNotificationAdapter(applicationContext: Context) :
         val animation: Animation =
             AnimationUtils.loadAnimation(
                 viewToAnimate.context,
-                android.R.anim.slide_in_left
+                android.R.anim.slide_in_left,
             )
         viewToAnimate.startAnimation(animation)
     }

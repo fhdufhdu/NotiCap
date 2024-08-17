@@ -15,19 +15,17 @@ import androidx.recyclerview.widget.RecyclerView
 import com.fhdufhdu.noticap.R
 import com.fhdufhdu.noticap.notification.manager.MemDB
 import com.fhdufhdu.noticap.notification.room.entities.KakaoNotificationEntity
-import com.fhdufhdu.noticap.util.IconConverter
 import com.fhdufhdu.noticap.util.SharedPreferenceManager
 import com.fhdufhdu.noticap.util.SizeManager
 import com.fhdufhdu.noticap.util.TimeCalculator
 
-
-class NotificationAdapter :
-    RecyclerView.Adapter<NotificationAdapter.ViewHolder>() {
-
+class NotificationAdapter : RecyclerView.Adapter<NotificationAdapter.ViewHolder>() {
     private var kakaoNotifications: List<KakaoNotificationEntity> = ArrayList()
     private val memDB: MemDB = MemDB.getInstance()
 
-    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class ViewHolder(
+        itemView: View,
+    ) : RecyclerView.ViewHolder(itemView) {
         val tvTitle: TextView = itemView.findViewById(R.id.tv_title)
         val tvSubText: TextView = itemView.findViewById(R.id.tv_sub_text)
         val tvText: TextView = itemView.findViewById(R.id.tv_text)
@@ -37,7 +35,10 @@ class NotificationAdapter :
         val cvMain: CardView = itemView.findViewById(R.id.cv_main)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): ViewHolder {
         val view =
             LayoutInflater.from(parent.context).inflate(R.layout.notification_item, parent, false)
         val viewHolder = ViewHolder(view)
@@ -53,12 +54,13 @@ class NotificationAdapter :
         return viewHolder
     }
 
-    override fun getItemCount(): Int {
-        return kakaoNotifications.size
-    }
+    override fun getItemCount(): Int = kakaoNotifications.size
 
     @SuppressLint("SimpleDateFormat")
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: ViewHolder,
+        position: Int,
+    ) {
         val notificationData = kakaoNotifications[position]
         val context = holder.itemView.context
 
@@ -83,16 +85,17 @@ class NotificationAdapter :
             if (notificationData.chatroomName == notificationData.sender) "" else notificationData.chatroomName
         holder.tvText.text = notificationData.content
 
-        holder.tvTime.text = TimeCalculator.toString(
-            SharedPreferenceManager.getTimeFormatType(context),
-            notificationData.time
-        )
+        holder.tvTime.text =
+            TimeCalculator.toString(
+                SharedPreferenceManager.getTimeFormatType(context),
+                notificationData.time,
+            )
         holder.cvReadMark.visibility =
             if (notificationData.unread) CardView.VISIBLE else CardView.INVISIBLE
-        val icon = memDB.getIconCompat(holder.itemView.context, notificationData.personKey, notificationData.personIcon)
-        if (icon != null)
+        val icon = memDB.getOrSaveIconCompat(holder.itemView.context, notificationData.personKey, notificationData.personIcon)
+        if (icon != null) {
             holder.ivChatroom.setImageIcon(icon.toIcon(holder.itemView.context))
-
+        }
     }
 
     private fun setAnimation(viewToAnimate: View) {

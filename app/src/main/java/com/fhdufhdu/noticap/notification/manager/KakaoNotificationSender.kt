@@ -87,7 +87,7 @@ class KakaoNotificationSender(
                     Person
                         .Builder()
                         .setName(name)
-                        .setIcon(memDB.getIconCompat(context, it.personKey, it.personIcon))
+                        .setIcon(memDB.getOrSaveIconCompat(context, it.personKey, it.personIcon))
 
                 return@map NotificationCompat.MessagingStyle.Message(
                     it.content,
