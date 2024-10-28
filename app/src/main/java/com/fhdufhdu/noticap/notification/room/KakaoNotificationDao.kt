@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import com.fhdufhdu.noticap.notification.room.entities.KakaoChatroomEntity
 import com.fhdufhdu.noticap.notification.room.entities.KakaoNotificationEntity
 import com.fhdufhdu.noticap.notification.room.projections.KakaoNotificationPerChatroom
 import com.fhdufhdu.noticap.notification.room.projections.KakaoUnreadNotification
@@ -61,6 +62,9 @@ interface KakaoNotificationDao {
     @Query("select * from Notification where unread = 1 order by time desc limit 20")
     fun selectUnreadChats(): List<KakaoNotificationEntity>
 
+    @Query("select * from Notification where unread = 1 and chatroom_name = :chatroomName order by time desc limit 20")
+    fun selectUnreadChatsByChatroomName(chatroomName: String): List<KakaoNotificationEntity>
+
     @Query("select not(count(*)) from Notification")
     fun isEmpty(): LiveData<Boolean>
 
@@ -75,4 +79,10 @@ interface KakaoNotificationDao {
 
     @Query("update Notification set do_run_animation = 0 where id = :id")
     fun updateDoRunAnimation(id: String)
+
+    @Query("select * from Chatroom where chatroom_name = :chatroomName")
+    fun selectOneChatroomInfo(chatroomName: String): KakaoChatroomEntity?
+
+    @Insert
+    fun insertChatroomInfo(vararg kakaoChatroomEntity: KakaoChatroomEntity)
 }

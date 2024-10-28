@@ -2,12 +2,14 @@ package com.fhdufhdu.noticap.notification.manager
 
 import android.app.PendingIntent
 import android.content.Context
+import android.graphics.drawable.Icon
 import androidx.core.graphics.drawable.IconCompat
 import com.fhdufhdu.noticap.util.IconConverter
 
 class MemDB {
     lateinit var pendingIntentMap: HashMap<String, PendingIntent>
     lateinit var iconCompatMap: HashMap<String, Pair<String, IconCompat>>
+    var kakaoNotiIcon: IconCompat? = null
 
     companion object {
         private var instance: MemDB? = null

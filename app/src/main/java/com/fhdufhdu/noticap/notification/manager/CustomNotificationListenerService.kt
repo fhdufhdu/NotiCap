@@ -1,20 +1,38 @@
 package com.fhdufhdu.noticap.notification.manager
 
 import android.app.Notification
+import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import androidx.core.app.NotificationCompat
 import androidx.core.app.Person
+import androidx.core.graphics.drawable.IconCompat
+import androidx.preference.PreferenceManager
 import com.fhdufhdu.noticap.notification.room.entities.KakaoNotificationEntity
 import com.fhdufhdu.noticap.util.CoroutineManager
 import com.fhdufhdu.noticap.util.IconConverter
 
 class CustomNotificationListenerService : NotificationListenerService() {
     private var kakaoNotificationSender: KakaoNotificationSender? = null
+    private var prefs: SharedPreferences? = null
 
     private fun initNotificationSender() {
         kakaoNotificationSender = kakaoNotificationSender ?: KakaoNotificationSender(this)
+        prefs = PreferenceManager.getDefaultSharedPreferences(this)
+    }
+
+    private fun isCancelKakaoNotification() = prefs?.getBoolean("CANCLE_KAKAO_NOTI", false) ?: false
+
+    override fun onCreate() {
+        super.onCreate()
+        initNotificationSender()
+        startForeground(100000000, kakaoNotificationSender?.getForegroundNotification())
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        return START_STICKY
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification) {
@@ -24,11 +42,20 @@ class CustomNotificationListenerService : NotificationListenerService() {
         val nPackageName = sbn.packageName
         val extras = sbn.notification.extras
 
-        if (nPackageName == "com.kakao.talk") {
+        if (nPackageName == "com.kakao.talk" && !isCancelKakaoNotification()) {
+            if (!isCancelKakaoNotification()) {
+                val chatroomName = getChatroomName(extras) ?: return
+
+                CoroutineManager.run {
+                    kakaoNotificationSender?.updateReadStatusAndSendNotification(chatroomName)
+                }
+            }
+        }
+        else if (nPackageName == packageName){
             val chatroomName = getChatroomName(extras) ?: return
 
             CoroutineManager.run {
-                kakaoNotificationSender?.updateReadStatusAndSendNotification(chatroomName)
+                kakaoNotificationSender?.updateReadStatus(chatroomName)
             }
         }
     }
@@ -42,13 +69,16 @@ class CustomNotificationListenerService : NotificationListenerService() {
         val extras = sbn.notification.extras
 
         if (nPackageName == "com.kakao.talk") {
+            if (isCancelKakaoNotification()) cancelNotification(sbn.key)
             val chatroomName = getChatroomName(extras) ?: return
             val kakaoNotificationEntity = getKakaoNotificationEntity(notification, extras) ?: return
+
 
             val memDB = MemDB.getInstance()
             if (!memDB.pendingIntentMap.containsKey(chatroomName)) {
                 memDB.pendingIntentMap[chatroomName] = notification.contentIntent
             }
+            memDB.kakaoNotiIcon = IconCompat.createFromIcon(this, notification.smallIcon)
 
             CoroutineManager.run {
                 kakaoNotificationSender?.addAndSendNotification(kakaoNotificationEntity)

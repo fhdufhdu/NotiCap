@@ -17,5 +17,15 @@
             android:key="TO_MOVE_TO_KAKAO"
             android:title="알림 내역 터치 시 해당 채팅방으로 이동"
             android:defaultValue="true"/>
+        <SwitchPreference
+            app:iconSpaceReserved="false"
+            android:key="CANCLE_KAKAO_NOTI"
+            android:title="카카오톡 알림 제거"
+            android:defaultValue="true"/>
+        <SwitchPreference
+            app:iconSpaceReserved="false"
+            android:key="DIRECT_KAKAO_TALK"
+            android:title="알림 터치시 바로 카카오톡 알림으로 넘어가게 하기"
+            android:defaultValue="true"/>
     </PreferenceCategory>
 </PreferenceScreen>

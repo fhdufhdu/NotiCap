@@ -1,52 +1,71 @@
 package com.fhdufhdu.noticap.notification.manager
 
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.Person
 import androidx.core.graphics.drawable.IconCompat
+import androidx.preference.PreferenceManager
 import com.fhdufhdu.noticap.R
 import com.fhdufhdu.noticap.notification.room.KakaoNotificationDao
 import com.fhdufhdu.noticap.notification.room.KakaoNotificationDatabase
+import com.fhdufhdu.noticap.notification.room.entities.KakaoChatroomEntity
 import com.fhdufhdu.noticap.notification.room.entities.KakaoNotificationEntity
 import com.fhdufhdu.noticap.ui.main.MainActivity
-import java.lang.StringBuilder
+
 
 class KakaoNotificationSender(
     private val context: Context,
 ) {
     private val notificationManager: NotificationManager
+    private val foregroundNotificationManager: NotificationManager
     private val kakaoNotificationDao: KakaoNotificationDao =
         KakaoNotificationDatabase.getInstance(context).kakaoNotificationDao()
     private val memDB: MemDB = MemDB.getInstance()
+    private var prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
     companion object {
-        const val NOTIFICATION_ID = 1026
+        const val NOTIFICATION_GROUP_KEY = "NOTI_GRUOP_KEY"
         const val CHANNEL_ID = "CAPTURE"
+        const val FOREGROUND_CHANNEL_ID = "FOREGROUND"
         const val ACTION_NAME = "UPDATE_NOTI_CAP"
     }
 
     init {
         val name = context.getString(R.string.channel_name)
         val descriptionText = context.getString(R.string.channel_description)
-        val importance = NotificationManager.IMPORTANCE_LOW
         val channel =
             NotificationChannel(
                 CHANNEL_ID,
                 name,
-                importance,
+                NotificationManager.IMPORTANCE_DEFAULT,
             ).apply {
                 description = descriptionText
             }
+        val foregroundChannel = NotificationChannel(
+            FOREGROUND_CHANNEL_ID,
+            "서비스 활성화",
+            NotificationManager.IMPORTANCE_DEFAULT
+        ).apply {
+            description = "서비스 활성화 알림"
+        }
 
         notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
+
+        foregroundNotificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        foregroundNotificationManager.createNotificationChannel(foregroundChannel)
     }
+
+    private fun isGoToKakaoTalk() = prefs.getBoolean("DIRECT_KAKAO_TALK", false)
 
     /**
      * 알림에 쓸 PendingIntent를 제작합니다.
@@ -99,11 +118,24 @@ class KakaoNotificationSender(
         return unreadChatNotificationMessages
     }
 
-    private fun sendNotification() {
-        val unreadChats = kakaoNotificationDao.selectUnreadChats()
+    fun getForegroundNotification(): Notification = NotificationCompat.Builder(context, FOREGROUND_CHANNEL_ID)
+        .setContentTitle("알림 서비스")
+        .setContentText("알림 서비스 활성화 중 입니다.")
+        .setSmallIcon(
+            memDB.kakaoNotiIcon ?: IconCompat.createWithResource(
+                context,
+                R.drawable.ic_notification,
+            )
+        )
+        .build()
+
+    private fun sendNotification(chatroomName: String) {
+        val unreadChats = kakaoNotificationDao.selectUnreadChatsByChatroomName(chatroomName)
+        val chatroomInfo = kakaoNotificationDao.selectOneChatroomInfo(chatroomName) ?: return
+        val notificationId = chatroomInfo.id
 
         if (unreadChats.isEmpty()) {
-            notificationManager.cancel(NOTIFICATION_ID)
+            notificationManager.cancel(notificationId)
             return
         }
 
@@ -114,35 +146,67 @@ class KakaoNotificationSender(
             messageStyle = messageStyle.addMessage(it)
         }
 
+        val pendingIntentMap = memDB.pendingIntentMap
+        val contentIntent =
+            if (isGoToKakaoTalk()) pendingIntentMap[chatroomName] ?: createNotificationPendingIntent(context)
+            else createNotificationPendingIntent(context)
+
         val builder =
             NotificationCompat
                 .Builder(context, CHANNEL_ID)
                 .setSmallIcon(
-                    IconCompat.createWithResource(
+                    memDB.kakaoNotiIcon ?: IconCompat.createWithResource(
                         context,
                         R.drawable.ic_notification,
                     ),
-                ).setContentTitle("읽지 않은 카카오톡 알림")
-                .setContentText("${unreadChatsNotificationMessages.size} 건의 카카오톡 알림을 읽지 않았습니다.")
+                )
+                .setContentTitle(chatroomName)
                 .setStyle(messageStyle)
                 .setCategory(NotificationCompat.CATEGORY_MESSAGE)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setContentIntent(createNotificationPendingIntent(context))
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(contentIntent)
+                .setGroup(NOTIFICATION_GROUP_KEY)
+                .setAutoCancel(true)
                 .setWhen(unreadChatsNotificationMessages.last().timestamp + 1)
-        notificationManager.notify(NOTIFICATION_ID, builder.build())
+
+        val summaryNotification: Notification = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(
+                memDB.kakaoNotiIcon ?: IconCompat.createWithResource(
+                    context,
+                    R.drawable.ic_notification,
+                )
+            )
+            .setStyle(
+                NotificationCompat.InboxStyle()
+                    .setSummaryText("카카오톡 알림")
+            )
+            .setGroup(NOTIFICATION_GROUP_KEY) // 동일한 그룹 키 설정
+            .setGroupSummary(true) // 그룹 요약 알림 표시
+            .build()
+
+        notificationManager.notify(notificationId, builder.build())
+        notificationManager.notify(1234, summaryNotification)
     }
 
     fun addAndSendNotification(kakaoNotificationEntity: KakaoNotificationEntity) {
         try {
             kakaoNotificationDao.insertNotification(kakaoNotificationEntity)
-            sendNotification()
+            kakaoNotificationDao.selectOneChatroomInfo(kakaoNotificationEntity.chatroomName)
+                ?: kakaoNotificationDao.insertChatroomInfo(
+                    KakaoChatroomEntity(kakaoNotificationEntity.chatroomName)
+                )
+            sendNotification(kakaoNotificationEntity.chatroomName)
         } catch (exception: Exception) {
             Log.e("중복 저장", exception.toString())
         }
     }
 
+    fun updateReadStatus(chatroomName: String) {
+        kakaoNotificationDao.updateRead(chatroomName)
+    }
+
     fun updateReadStatusAndSendNotification(chatroomName: String) {
         kakaoNotificationDao.updateRead(chatroomName)
-        sendNotification()
+        sendNotification(chatroomName)
     }
 }
