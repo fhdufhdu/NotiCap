@@ -9,7 +9,6 @@ import com.fhdufhdu.noticap.util.IconConverter
 class MemDB {
     lateinit var pendingIntentMap: HashMap<String, PendingIntent>
     lateinit var iconCompatMap: HashMap<String, Pair<String, IconCompat>>
-    var kakaoNotiIcon: IconCompat? = null
 
     companion object {
         private var instance: MemDB? = null

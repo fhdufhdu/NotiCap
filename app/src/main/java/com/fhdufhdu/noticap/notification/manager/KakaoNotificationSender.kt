@@ -18,6 +18,7 @@ import com.fhdufhdu.noticap.notification.room.KakaoNotificationDatabase
 import com.fhdufhdu.noticap.notification.room.entities.KakaoChatroomEntity
 import com.fhdufhdu.noticap.notification.room.entities.KakaoNotificationEntity
 import com.fhdufhdu.noticap.ui.main.MainActivity
+import com.fhdufhdu.noticap.ui.main.detail.DetailActivity
 
 
 class KakaoNotificationSender(
@@ -28,7 +29,6 @@ class KakaoNotificationSender(
     private val kakaoNotificationDao: KakaoNotificationDao =
         KakaoNotificationDatabase.getInstance(context).kakaoNotificationDao()
     private val memDB: MemDB = MemDB.getInstance()
-    private var prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
     companion object {
         const val NOTIFICATION_GROUP_KEY = "NOTI_GRUOP_KEY"
@@ -44,14 +44,14 @@ class KakaoNotificationSender(
             NotificationChannel(
                 CHANNEL_ID,
                 name,
-                NotificationManager.IMPORTANCE_DEFAULT,
+                NotificationManager.IMPORTANCE_HIGH,
             ).apply {
                 description = descriptionText
             }
         val foregroundChannel = NotificationChannel(
             FOREGROUND_CHANNEL_ID,
             "서비스 활성화",
-            NotificationManager.IMPORTANCE_DEFAULT
+            NotificationManager.IMPORTANCE_HIGH
         ).apply {
             description = "서비스 활성화 알림"
         }
@@ -65,18 +65,17 @@ class KakaoNotificationSender(
         foregroundNotificationManager.createNotificationChannel(foregroundChannel)
     }
 
-    private fun isGoToKakaoTalk() = prefs.getBoolean("DIRECT_KAKAO_TALK", false)
-
     /**
      * 알림에 쓸 PendingIntent를 제작합니다.
      *
      * @param context PendingIntent 제작에 사용할 Context
      * @return MainActivity 로 이동하게 하는 PendingIntent
      */
-    private fun createNotificationPendingIntent(context: Context): PendingIntent {
-        val intent = Intent(context, MainActivity::class.java)
+    private fun createNotificationPendingIntent(context: Context, chatroomName: String): PendingIntent {
+        val intent = Intent(context, DetailActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        intent.putExtra("CHATROOM_NAME", chatroomName)
 
         return PendingIntent.getActivity(
             context,
@@ -122,7 +121,7 @@ class KakaoNotificationSender(
         .setContentTitle("알림 서비스")
         .setContentText("알림 서비스 활성화 중 입니다.")
         .setSmallIcon(
-            memDB.kakaoNotiIcon ?: IconCompat.createWithResource(
+            IconCompat.createWithResource(
                 context,
                 R.drawable.ic_notification,
             )
@@ -146,32 +145,27 @@ class KakaoNotificationSender(
             messageStyle = messageStyle.addMessage(it)
         }
 
-        val pendingIntentMap = memDB.pendingIntentMap
-        val contentIntent =
-            if (isGoToKakaoTalk()) pendingIntentMap[chatroomName] ?: createNotificationPendingIntent(context)
-            else createNotificationPendingIntent(context)
-
         val builder =
             NotificationCompat
                 .Builder(context, CHANNEL_ID)
                 .setSmallIcon(
-                    memDB.kakaoNotiIcon ?: IconCompat.createWithResource(
-                        context,
-                        R.drawable.ic_notification,
-                    ),
+                   IconCompat.createWithResource(
+                       context,
+                       R.drawable.ic_notification
+                   ),
                 )
                 .setContentTitle(chatroomName)
                 .setStyle(messageStyle)
                 .setCategory(NotificationCompat.CATEGORY_MESSAGE)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setContentIntent(contentIntent)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setContentIntent(createNotificationPendingIntent(context, chatroomName))
                 .setGroup(NOTIFICATION_GROUP_KEY)
                 .setAutoCancel(true)
                 .setWhen(unreadChatsNotificationMessages.last().timestamp + 1)
 
         val summaryNotification: Notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(
-                memDB.kakaoNotiIcon ?: IconCompat.createWithResource(
+               IconCompat.createWithResource(
                     context,
                     R.drawable.ic_notification,
                 )

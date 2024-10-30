@@ -16,14 +16,11 @@ import com.fhdufhdu.noticap.util.IconConverter
 
 class CustomNotificationListenerService : NotificationListenerService() {
     private var kakaoNotificationSender: KakaoNotificationSender? = null
-    private var prefs: SharedPreferences? = null
 
     private fun initNotificationSender() {
         kakaoNotificationSender = kakaoNotificationSender ?: KakaoNotificationSender(this)
-        prefs = PreferenceManager.getDefaultSharedPreferences(this)
     }
 
-    private fun isCancelKakaoNotification() = prefs?.getBoolean("CANCLE_KAKAO_NOTI", false) ?: false
 
     override fun onCreate() {
         super.onCreate()
@@ -42,13 +39,11 @@ class CustomNotificationListenerService : NotificationListenerService() {
         val nPackageName = sbn.packageName
         val extras = sbn.notification.extras
 
-        if (nPackageName == "com.kakao.talk" && !isCancelKakaoNotification()) {
-            if (!isCancelKakaoNotification()) {
-                val chatroomName = getChatroomName(extras) ?: return
+        if (nPackageName == "com.kakao.talk") {
+            val chatroomName = getChatroomName(extras) ?: return
 
-                CoroutineManager.run {
-                    kakaoNotificationSender?.updateReadStatusAndSendNotification(chatroomName)
-                }
+            CoroutineManager.run {
+                kakaoNotificationSender?.updateReadStatusAndSendNotification(chatroomName)
             }
         }
         else if (nPackageName == packageName){
@@ -69,7 +64,6 @@ class CustomNotificationListenerService : NotificationListenerService() {
         val extras = sbn.notification.extras
 
         if (nPackageName == "com.kakao.talk") {
-            if (isCancelKakaoNotification()) cancelNotification(sbn.key)
             val chatroomName = getChatroomName(extras) ?: return
             val kakaoNotificationEntity = getKakaoNotificationEntity(notification, extras) ?: return
 
@@ -78,7 +72,6 @@ class CustomNotificationListenerService : NotificationListenerService() {
             if (!memDB.pendingIntentMap.containsKey(chatroomName)) {
                 memDB.pendingIntentMap[chatroomName] = notification.contentIntent
             }
-            memDB.kakaoNotiIcon = IconCompat.createFromIcon(this, notification.smallIcon)
 
             CoroutineManager.run {
                 kakaoNotificationSender?.addAndSendNotification(kakaoNotificationEntity)
