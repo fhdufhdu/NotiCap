@@ -1,12 +1,14 @@
 package com.fhdufhdu.noticap.notification.room
 
 import android.content.Context
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.fhdufhdu.noticap.notification.room.entities.KakaoChatroomEntity
 import com.fhdufhdu.noticap.notification.room.entities.KakaoNotificationEntity
 
-@Database(entities = [KakaoNotificationEntity::class], version = 1)
+@Database(entities = [KakaoNotificationEntity::class, KakaoChatroomEntity::class], version = 2, autoMigrations = [AutoMigration(from = 1, to = 2)])
 abstract class KakaoNotificationDatabase : RoomDatabase() {
     abstract fun kakaoNotificationDao(): KakaoNotificationDao
 
@@ -21,7 +23,7 @@ abstract class KakaoNotificationDatabase : RoomDatabase() {
                             .databaseBuilder(
                                 applicationContext,
                                 KakaoNotificationDatabase::class.java,
-                                "database",
+                                "database"
                             ).build()
                 }
                 return instance!!

@@ -8,5 +8,5 @@ data class KakaoUnreadNotification(
     val chatroomName: String,
 
     @ColumnInfo(name = "unread_count")
-    val unreadCount: Int,
+    val unreadCount: Int
 )

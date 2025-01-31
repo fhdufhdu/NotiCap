@@ -23,8 +23,6 @@ class SharedPreferenceManager {
             val pref = getSharedPreference(context)
 
             return pref.getBoolean("TO_MOVE_TO_KAKAO", true)
-
         }
     }
-
 }

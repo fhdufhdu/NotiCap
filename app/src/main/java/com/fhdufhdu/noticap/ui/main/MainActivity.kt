@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
                             override fun onPermissionGranted() {}
 
                             override fun onPermissionDenied(deniedPermissions: MutableList<String>?) {}
-                        },
+                        }
                     ).setDeniedMessage("알림 권한을 허용하지 않으시면 앱을 사용하실 수 없습니다.")
                     .setPermissions(Manifest.permission.POST_NOTIFICATIONS)
                     .check()
@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             window.addFlags(
                 WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON,
+                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
             )
         }
 
@@ -97,7 +97,7 @@ class MainActivity : AppCompatActivity() {
 
         viewModel =
             ViewModelProvider(this, KakaoNotificationPerChatroomViewModelFactory(dao)).get(
-                KakaoNotificationPerChatroomViewModel::class.java,
+                KakaoNotificationPerChatroomViewModel::class.java
             )
 //        viewModel.fetchFirstPage(NOTIFICATION_PAGE_SIZE)
 
@@ -122,7 +122,7 @@ class MainActivity : AppCompatActivity() {
                 override fun onScrolled(
                     recyclerView: RecyclerView,
                     dx: Int,
-                    dy: Int,
+                    dy: Int
                 ) {
                     super.onScrolled(recyclerView, dx, dy)
                     // 마지막 스크롤된 항목 위치
@@ -140,7 +140,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 }
-            },
+            }
         )
     }
 
@@ -161,8 +161,8 @@ class MainActivity : AppCompatActivity() {
             return notificationManager.isNotificationListenerAccessGranted(
                 ComponentName(
                     application,
-                    CustomNotificationListenerService::class.java,
-                ),
+                    CustomNotificationListenerService::class.java
+                )
             )
         } else {
             return NotificationManagerCompat
@@ -192,7 +192,7 @@ class MainActivity : AppCompatActivity() {
     inner class ScreenOffReceiver : BroadcastReceiver() {
         override fun onReceive(
             context: Context?,
-            intent: Intent?,
+            intent: Intent?
         ) {
             if (Intent.ACTION_SCREEN_OFF == intent?.action) {
                 finish()

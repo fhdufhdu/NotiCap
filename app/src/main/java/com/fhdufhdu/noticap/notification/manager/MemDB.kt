@@ -29,12 +29,12 @@ class MemDB {
     private fun saveIconCompat(
         context: Context,
         personKey: String,
-        personIcon: String,
+        personIcon: String
     ): Pair<String, IconCompat> {
         val icon =
             IconCompat.createFromIcon(
                 context,
-                IconConverter.stringToIcon(personIcon)!!,
+                IconConverter.stringToIcon(personIcon)!!
             )
         val pair = Pair(personIcon, icon!!)
         iconCompatMap[personKey] = pair
@@ -44,7 +44,7 @@ class MemDB {
     fun getOrSaveIconCompat(
         context: Context,
         personKey: String?,
-        personIcon: String?,
+        personIcon: String?
     ): IconCompat? {
         if (personKey == null || personIcon == null) return null
 

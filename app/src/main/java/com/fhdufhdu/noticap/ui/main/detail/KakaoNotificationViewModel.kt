@@ -27,5 +27,4 @@ class KakaoNotificationViewModel(private val dao: KakaoNotificationDao) : ViewMo
             _notificationList.postValue(prevList)
         }
     }
-
 }

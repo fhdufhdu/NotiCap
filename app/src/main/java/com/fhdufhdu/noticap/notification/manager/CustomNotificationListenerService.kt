@@ -1,6 +1,7 @@
 package com.fhdufhdu.noticap.notification.manager
 
 import android.app.Notification
+import android.content.Intent
 import android.os.Bundle
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
@@ -17,6 +18,16 @@ class CustomNotificationListenerService : NotificationListenerService() {
         kakaoNotificationSender = kakaoNotificationSender ?: KakaoNotificationSender(this)
     }
 
+    override fun onCreate() {
+        super.onCreate()
+        initNotificationSender()
+        startForeground(100000000, kakaoNotificationSender?.getForegroundNotification())
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        return START_STICKY
+    }
+
     override fun onNotificationRemoved(sbn: StatusBarNotification) {
         super.onNotificationRemoved(sbn)
         initNotificationSender()
@@ -29,6 +40,12 @@ class CustomNotificationListenerService : NotificationListenerService() {
 
             CoroutineManager.run {
                 kakaoNotificationSender?.updateReadStatusAndSendNotification(chatroomName)
+            }
+        } else if (nPackageName == packageName) {
+            val chatroomName = getChatroomName(extras) ?: return
+
+            CoroutineManager.run {
+                kakaoNotificationSender?.updateReadStatus(chatroomName)
             }
         }
     }
@@ -58,7 +75,7 @@ class CustomNotificationListenerService : NotificationListenerService() {
 
     private fun getKakaoNotificationEntity(
         notification: Notification,
-        extras: Bundle,
+        extras: Bundle
     ): KakaoNotificationEntity? {
         val title = extras.getString(Notification.EXTRA_TITLE) ?: return null
         val text = extras.getString(Notification.EXTRA_TEXT) ?: return null
@@ -79,7 +96,7 @@ class CustomNotificationListenerService : NotificationListenerService() {
             text,
             personKey,
             personIcon,
-            time,
+            time
         )
     }
 

@@ -25,7 +25,7 @@ import com.fhdufhdu.noticap.util.SizeManager
 import com.fhdufhdu.noticap.util.TimeCalculator
 
 class ChatroomNotificationAdapter(
-    applicationContext: Context,
+    applicationContext: Context
 ) : RecyclerView.Adapter<ChatroomNotificationAdapter.ViewHolder>() {
     private val dao: KakaoNotificationDao
     private var kakaoNotificationsPerChatroom: List<KakaoNotificationPerChatroom> = ArrayList()
@@ -36,7 +36,7 @@ class ChatroomNotificationAdapter(
     }
 
     class ViewHolder(
-        itemView: View,
+        itemView: View
     ) : RecyclerView.ViewHolder(itemView) {
         val tvTitle: TextView = itemView.findViewById(R.id.tv_title)
         val tvSubText: TextView = itemView.findViewById(R.id.tv_sub_text)
@@ -48,7 +48,7 @@ class ChatroomNotificationAdapter(
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
-        viewType: Int,
+        viewType: Int
     ): ViewHolder {
         val view =
             LayoutInflater.from(parent.context).inflate(R.layout.notification_item, parent, false)
@@ -70,7 +70,7 @@ class ChatroomNotificationAdapter(
     @SuppressLint("SimpleDateFormat")
     override fun onBindViewHolder(
         holder: ViewHolder,
-        position: Int,
+        position: Int
     ) {
         val notificationData = kakaoNotificationsPerChatroom[position]
         val context = holder.itemView.context
@@ -88,7 +88,7 @@ class ChatroomNotificationAdapter(
                 .setPositiveButton("확인") { _, _ ->
                     CoroutineManager.run {
                         dao.deleteOne(
-                            notificationData.chatroomName,
+                            notificationData.chatroomName
                         )
                     }
                 }.setNegativeButton("취소", null)
@@ -103,10 +103,10 @@ class ChatroomNotificationAdapter(
         val unreadCount = notificationData.unreadCount
         val unreadStr = if (unreadCount > 0) "($unreadCount)" else ""
         "${
-            TimeCalculator.toString(
-                SharedPreferenceManager.getTimeFormatType(context),
-                notificationData.time,
-            )
+        TimeCalculator.toString(
+            SharedPreferenceManager.getTimeFormatType(context),
+            notificationData.time
+        )
         } $unreadStr".also { holder.tvTime.text = it }
         holder.cvReadMark.visibility =
             if (notificationData.unread) CardView.VISIBLE else CardView.INVISIBLE
@@ -128,7 +128,7 @@ class ChatroomNotificationAdapter(
         val animation: Animation =
             AnimationUtils.loadAnimation(
                 viewToAnimate.context,
-                android.R.anim.slide_in_left,
+                android.R.anim.slide_in_left
             )
         viewToAnimate.startAnimation(animation)
     }

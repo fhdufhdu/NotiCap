@@ -24,7 +24,7 @@ class NotificationAdapter : RecyclerView.Adapter<NotificationAdapter.ViewHolder>
     private val memDB: MemDB = MemDB.getInstance()
 
     class ViewHolder(
-        itemView: View,
+        itemView: View
     ) : RecyclerView.ViewHolder(itemView) {
         val tvTitle: TextView = itemView.findViewById(R.id.tv_title)
         val tvSubText: TextView = itemView.findViewById(R.id.tv_sub_text)
@@ -37,7 +37,7 @@ class NotificationAdapter : RecyclerView.Adapter<NotificationAdapter.ViewHolder>
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
-        viewType: Int,
+        viewType: Int
     ): ViewHolder {
         val view =
             LayoutInflater.from(parent.context).inflate(R.layout.notification_item, parent, false)
@@ -59,7 +59,7 @@ class NotificationAdapter : RecyclerView.Adapter<NotificationAdapter.ViewHolder>
     @SuppressLint("SimpleDateFormat")
     override fun onBindViewHolder(
         holder: ViewHolder,
-        position: Int,
+        position: Int
     ) {
         val notificationData = kakaoNotifications[position]
         val context = holder.itemView.context
@@ -88,7 +88,7 @@ class NotificationAdapter : RecyclerView.Adapter<NotificationAdapter.ViewHolder>
         holder.tvTime.text =
             TimeCalculator.toString(
                 SharedPreferenceManager.getTimeFormatType(context),
-                notificationData.time,
+                notificationData.time
             )
         holder.cvReadMark.visibility =
             if (notificationData.unread) CardView.VISIBLE else CardView.INVISIBLE
