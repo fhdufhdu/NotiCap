@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
+    id("org.jlleitschuh.gradle.ktlint")
 }
 
 android {
@@ -22,7 +23,7 @@ android {
 
         javaCompileOptions {
             annotationProcessorOptions {
-                arguments["room.schemaLocation"] =  "$projectDir/schemas"
+                arguments["room.schemaLocation"] = "$projectDir/schemas"
             }
         }
     }
@@ -53,8 +54,6 @@ android {
         }
     }
 }
-
-
 
 dependencies {
     implementation("androidx.core:core-ktx:1.10.1")

@@ -47,7 +47,7 @@ class DetailActivity : AppCompatActivity() {
             window.addFlags(
                 WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
                     WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON,
+                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
             )
         }
 
@@ -68,7 +68,7 @@ class DetailActivity : AppCompatActivity() {
 
         viewModel =
             ViewModelProvider(this, KakaoNotificationViewModelFactory(dao)).get(
-                KakaoNotificationViewModel::class.java,
+                KakaoNotificationViewModel::class.java
             )
         viewModel.fetchFirstPage(chatroomName, NOTIFICATION_PAGE_SIZE)
 
@@ -83,7 +83,7 @@ class DetailActivity : AppCompatActivity() {
                 override fun onScrolled(
                     recyclerView: RecyclerView,
                     dx: Int,
-                    dy: Int,
+                    dy: Int
                 ) {
                     super.onScrolled(recyclerView, dx, dy)
                     // 마지막 스크롤된 항목 위치
@@ -100,12 +100,12 @@ class DetailActivity : AppCompatActivity() {
                             viewModel.fetchNextPage(
                                 chatroomName,
                                 notificationPageNumber,
-                                NOTIFICATION_PAGE_SIZE,
+                                NOTIFICATION_PAGE_SIZE
                             )
                         }
                     }
                 }
-            },
+            }
         )
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
@@ -135,7 +135,7 @@ class DetailActivity : AppCompatActivity() {
     inner class ScreenOffReceiver : BroadcastReceiver() {
         override fun onReceive(
             context: Context?,
-            intent: Intent?,
+            intent: Intent?
         ) {
             if (Intent.ACTION_SCREEN_OFF == intent?.action) {
                 finish()

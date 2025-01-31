@@ -9,7 +9,6 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toIcon
 import java.io.ByteArrayOutputStream
 
-
 class IconConverter {
 
     companion object {

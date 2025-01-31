@@ -2,14 +2,11 @@ package com.fhdufhdu.noticap.notification.manager
 
 import android.app.Notification
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import androidx.core.app.NotificationCompat
 import androidx.core.app.Person
-import androidx.core.graphics.drawable.IconCompat
-import androidx.preference.PreferenceManager
 import com.fhdufhdu.noticap.notification.room.entities.KakaoNotificationEntity
 import com.fhdufhdu.noticap.util.CoroutineManager
 import com.fhdufhdu.noticap.util.IconConverter
@@ -20,7 +17,6 @@ class CustomNotificationListenerService : NotificationListenerService() {
     private fun initNotificationSender() {
         kakaoNotificationSender = kakaoNotificationSender ?: KakaoNotificationSender(this)
     }
-
 
     override fun onCreate() {
         super.onCreate()
@@ -45,8 +41,7 @@ class CustomNotificationListenerService : NotificationListenerService() {
             CoroutineManager.run {
                 kakaoNotificationSender?.updateReadStatusAndSendNotification(chatroomName)
             }
-        }
-        else if (nPackageName == packageName){
+        } else if (nPackageName == packageName) {
             val chatroomName = getChatroomName(extras) ?: return
 
             CoroutineManager.run {
@@ -67,7 +62,6 @@ class CustomNotificationListenerService : NotificationListenerService() {
             val chatroomName = getChatroomName(extras) ?: return
             val kakaoNotificationEntity = getKakaoNotificationEntity(notification, extras) ?: return
 
-
             val memDB = MemDB.getInstance()
             if (!memDB.pendingIntentMap.containsKey(chatroomName)) {
                 memDB.pendingIntentMap[chatroomName] = notification.contentIntent
@@ -81,7 +75,7 @@ class CustomNotificationListenerService : NotificationListenerService() {
 
     private fun getKakaoNotificationEntity(
         notification: Notification,
-        extras: Bundle,
+        extras: Bundle
     ): KakaoNotificationEntity? {
         val title = extras.getString(Notification.EXTRA_TITLE) ?: return null
         val text = extras.getString(Notification.EXTRA_TEXT) ?: return null
@@ -102,7 +96,7 @@ class CustomNotificationListenerService : NotificationListenerService() {
             text,
             personKey,
             personIcon,
-            time,
+            time
         )
     }
 

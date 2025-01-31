@@ -8,7 +8,7 @@ import androidx.room.RoomDatabase
 import com.fhdufhdu.noticap.notification.room.entities.KakaoChatroomEntity
 import com.fhdufhdu.noticap.notification.room.entities.KakaoNotificationEntity
 
-@Database(entities = [KakaoNotificationEntity::class, KakaoChatroomEntity::class], version = 2, autoMigrations = [AutoMigration(from=1, to=2)])
+@Database(entities = [KakaoNotificationEntity::class, KakaoChatroomEntity::class], version = 2, autoMigrations = [AutoMigration(from = 1, to = 2)])
 abstract class KakaoNotificationDatabase : RoomDatabase() {
     abstract fun kakaoNotificationDao(): KakaoNotificationDao
 
@@ -23,7 +23,7 @@ abstract class KakaoNotificationDatabase : RoomDatabase() {
                             .databaseBuilder(
                                 applicationContext,
                                 KakaoNotificationDatabase::class.java,
-                                "database",
+                                "database"
                             ).build()
                 }
                 return instance!!

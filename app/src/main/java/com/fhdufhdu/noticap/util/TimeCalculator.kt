@@ -23,7 +23,6 @@ class TimeCalculator {
                 }
 
                 else -> {
-
                     return if (calc < 60) {
                         "방금 전"
                     } else if (calc < 60 * 60) {

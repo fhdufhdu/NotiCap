@@ -6,23 +6,19 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.Person
 import androidx.core.graphics.drawable.IconCompat
-import androidx.preference.PreferenceManager
 import com.fhdufhdu.noticap.R
 import com.fhdufhdu.noticap.notification.room.KakaoNotificationDao
 import com.fhdufhdu.noticap.notification.room.KakaoNotificationDatabase
 import com.fhdufhdu.noticap.notification.room.entities.KakaoChatroomEntity
 import com.fhdufhdu.noticap.notification.room.entities.KakaoNotificationEntity
-import com.fhdufhdu.noticap.ui.main.MainActivity
 import com.fhdufhdu.noticap.ui.main.detail.DetailActivity
 
-
 class KakaoNotificationSender(
-    private val context: Context,
+    private val context: Context
 ) {
     private val notificationManager: NotificationManager
     private val foregroundNotificationManager: NotificationManager
@@ -44,7 +40,7 @@ class KakaoNotificationSender(
             NotificationChannel(
                 CHANNEL_ID,
                 name,
-                NotificationManager.IMPORTANCE_HIGH,
+                NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = descriptionText
             }
@@ -81,7 +77,7 @@ class KakaoNotificationSender(
             context,
             System.currentTimeMillis().toInt(),
             intent,
-            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_MUTABLE,
+            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_MUTABLE
         )
     }
 
@@ -110,7 +106,7 @@ class KakaoNotificationSender(
                 return@map NotificationCompat.MessagingStyle.Message(
                     it.content,
                     it.time,
-                    personBuilder.build(),
+                    personBuilder.build()
                 )
             }
 
@@ -123,7 +119,7 @@ class KakaoNotificationSender(
         .setSmallIcon(
             IconCompat.createWithResource(
                 context,
-                R.drawable.ic_notification,
+                R.drawable.ic_notification
             )
         )
         .build()
@@ -149,10 +145,10 @@ class KakaoNotificationSender(
             NotificationCompat
                 .Builder(context, CHANNEL_ID)
                 .setSmallIcon(
-                   IconCompat.createWithResource(
-                       context,
-                       R.drawable.ic_notification
-                   ),
+                    IconCompat.createWithResource(
+                        context,
+                        R.drawable.ic_notification
+                    )
                 )
                 .setContentTitle(chatroomName)
                 .setStyle(messageStyle)
@@ -165,9 +161,9 @@ class KakaoNotificationSender(
 
         val summaryNotification: Notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(
-               IconCompat.createWithResource(
+                IconCompat.createWithResource(
                     context,
-                    R.drawable.ic_notification,
+                    R.drawable.ic_notification
                 )
             )
             .setStyle(

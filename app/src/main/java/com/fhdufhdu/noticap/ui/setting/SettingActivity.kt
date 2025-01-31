@@ -14,6 +14,5 @@ class SettingActivity : AppCompatActivity() {
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, SettingFragment(), "setting_fragment")
             .commit()
-
     }
 }

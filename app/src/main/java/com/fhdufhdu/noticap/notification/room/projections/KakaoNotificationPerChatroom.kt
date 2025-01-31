@@ -22,5 +22,5 @@ data class KakaoNotificationPerChatroom(
     @ColumnInfo(name = "do_run_animation")
     var doRunAnimation: Boolean,
     @ColumnInfo
-    val id: Long = 0,
+    val id: Long = 0
 )
