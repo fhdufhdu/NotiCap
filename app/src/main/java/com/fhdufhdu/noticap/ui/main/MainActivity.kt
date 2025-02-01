@@ -30,6 +30,7 @@ import com.fhdufhdu.noticap.notification.manager.CustomNotificationListenerServi
 import com.fhdufhdu.noticap.notification.manager.KakaoNotificationSender
 import com.fhdufhdu.noticap.notification.room.KakaoNotificationDatabase
 import com.fhdufhdu.noticap.notification.room.projections.KakaoNotificationPerChatroom
+import com.fhdufhdu.noticap.notification.worker.WorkManager
 import com.fhdufhdu.noticap.ui.setting.SettingActivity
 import com.fhdufhdu.noticap.util.CoroutineManager
 import com.gun0912.tedpermission.PermissionListener
@@ -142,10 +143,13 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         )
+
+        WorkManager.schedulePeriodicWork(this)
     }
 
     override fun onResume() {
         super.onResume()
+//        startNotificationService()
         prefs.registerOnSharedPreferenceChangeListener(prefsListener)
         viewModel.fetchFirstPage((notificationPageNumber + 1) * NOTIFICATION_PAGE_SIZE)
     }
@@ -188,6 +192,11 @@ class MainActivity : AppCompatActivity() {
                 super.onOptionsItemSelected(item)
             }
         }
+
+    private fun startNotificationService() {
+        val serviceIntent = Intent(this, CustomNotificationListenerService::class.java)
+        startForegroundService(serviceIntent)
+    }
 
     inner class ScreenOffReceiver : BroadcastReceiver() {
         override fun onReceive(

@@ -19,12 +19,14 @@ class CustomNotificationListenerService : NotificationListenerService() {
     }
 
     override fun onCreate() {
-        super.onCreate()
         initNotificationSender()
-        startForeground(100000000, kakaoNotificationSender?.getForegroundNotification())
+        super.onCreate()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        kakaoNotificationSender?.let {
+            startForeground(100000000, it.getForegroundNotification())
+        }
         return START_STICKY
     }
 

@@ -47,7 +47,7 @@ class KakaoNotificationSender(
         val foregroundChannel = NotificationChannel(
             FOREGROUND_CHANNEL_ID,
             "서비스 활성화",
-            NotificationManager.IMPORTANCE_HIGH
+            NotificationManager.IMPORTANCE_NONE
         ).apply {
             description = "서비스 활성화 알림"
         }
@@ -122,6 +122,10 @@ class KakaoNotificationSender(
                 R.drawable.ic_notification
             )
         )
+        .setPriority(NotificationCompat.PRIORITY_MIN)
+        .setOngoing(true)
+        .setAutoCancel(false)
+        .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
         .build()
 
     private fun sendNotification(chatroomName: String) {
