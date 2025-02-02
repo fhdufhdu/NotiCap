@@ -12,11 +12,13 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
 import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
 import android.view.WindowManager
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.Observer
@@ -30,7 +32,6 @@ import com.fhdufhdu.noticap.notification.manager.CustomNotificationListenerServi
 import com.fhdufhdu.noticap.notification.manager.KakaoNotificationSender
 import com.fhdufhdu.noticap.notification.room.KakaoNotificationDatabase
 import com.fhdufhdu.noticap.notification.room.projections.KakaoNotificationPerChatroom
-import com.fhdufhdu.noticap.notification.worker.WorkManager
 import com.fhdufhdu.noticap.ui.setting.SettingActivity
 import com.fhdufhdu.noticap.util.CoroutineManager
 import com.gun0912.tedpermission.PermissionListener
@@ -143,13 +144,11 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         )
-
-        WorkManager.schedulePeriodicWork(this)
+        openBatteryOptimizationSettingDialog()
     }
 
     override fun onResume() {
         super.onResume()
-//        startNotificationService()
         prefs.registerOnSharedPreferenceChangeListener(prefsListener)
         viewModel.fetchFirstPage((notificationPageNumber + 1) * NOTIFICATION_PAGE_SIZE)
     }
@@ -193,9 +192,23 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-    private fun startNotificationService() {
-        val serviceIntent = Intent(this, CustomNotificationListenerService::class.java)
-        startForegroundService(serviceIntent)
+    private fun openBatteryOptimizationSettingDialog() {
+        val powerManager = getSystemService(POWER_SERVICE) as PowerManager
+        if (!powerManager.isIgnoringBatteryOptimizations(packageName)) {
+            // 화이트 리스트 등록 안됨.
+            AlertDialog.Builder(this)
+                .setTitle("배터리 최적화 제외")
+                .setMessage("카카오톡 알림을 제대로 받아오시려면 배터리 최적화 제외가 필요합니다.")
+                .setNegativeButton("취소") { dialog, _ -> dialog.dismiss() }
+                .setPositiveButton("설정하러 가기") { dialog, _ ->
+                    val intent = Intent().apply {
+                        setAction(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                    }
+                    startActivity(intent)
+                    dialog.dismiss()
+                }
+                .show()
+        }
     }
 
     inner class ScreenOffReceiver : BroadcastReceiver() {

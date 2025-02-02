@@ -11,11 +11,14 @@ import com.fhdufhdu.noticap.notification.room.entities.KakaoNotificationEntity
 import com.fhdufhdu.noticap.util.CoroutineManager
 import com.fhdufhdu.noticap.util.IconConverter
 
+private const val KAKAOTALK_PACKAGE_NAME = "com.kakao.talk"
 class CustomNotificationListenerService : NotificationListenerService() {
     private var kakaoNotificationSender: KakaoNotificationSender? = null
 
     private fun initNotificationSender() {
-        kakaoNotificationSender = kakaoNotificationSender ?: KakaoNotificationSender(this)
+        if (kakaoNotificationSender == null) {
+            kakaoNotificationSender = KakaoNotificationSender(this)
+        }
     }
 
     override fun onCreate() {
@@ -24,9 +27,6 @@ class CustomNotificationListenerService : NotificationListenerService() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        kakaoNotificationSender?.let {
-            startForeground(100000000, it.getForegroundNotification())
-        }
         return START_STICKY
     }
 
@@ -37,7 +37,7 @@ class CustomNotificationListenerService : NotificationListenerService() {
         val nPackageName = sbn.packageName
         val extras = sbn.notification.extras
 
-        if (nPackageName == "com.kakao.talk") {
+        if (nPackageName == KAKAOTALK_PACKAGE_NAME) {
             val chatroomName = getChatroomName(extras) ?: return
 
             CoroutineManager.run {
@@ -60,7 +60,7 @@ class CustomNotificationListenerService : NotificationListenerService() {
         val notification = sbn.notification
         val extras = sbn.notification.extras
 
-        if (nPackageName == "com.kakao.talk") {
+        if (nPackageName == KAKAOTALK_PACKAGE_NAME) {
             val chatroomName = getChatroomName(extras) ?: return
             val kakaoNotificationEntity = getKakaoNotificationEntity(notification, extras) ?: return
 
