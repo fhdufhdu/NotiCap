@@ -21,6 +21,7 @@ class KakaoNotificationSender(
     private val context: Context
 ) {
     private val notificationManager: NotificationManager
+    private val foregroundNotificationManager: NotificationManager
     private val kakaoNotificationDao: KakaoNotificationDao =
         KakaoNotificationDatabase.getInstance(context).kakaoNotificationDao()
     private val memDB: MemDB = MemDB.getInstance()
@@ -28,6 +29,7 @@ class KakaoNotificationSender(
     companion object {
         const val NOTIFICATION_GROUP_KEY = "NOTI_GRUOP_KEY"
         const val CHANNEL_ID = "CAPTURE"
+        const val FOREGROUND_CHANNEL_ID = "FOREGROUND"
         const val ACTION_NAME = "UPDATE_NOTI_CAP"
     }
 
@@ -38,14 +40,25 @@ class KakaoNotificationSender(
             NotificationChannel(
                 CHANNEL_ID,
                 name,
-                NotificationManager.IMPORTANCE_HIGH
+                NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
                 description = descriptionText
             }
+        val foregroundChannel = NotificationChannel(
+            FOREGROUND_CHANNEL_ID,
+            "서비스 활성화",
+            NotificationManager.IMPORTANCE_MIN
+        ).apply {
+            description = "서비스 활성화 알림"
+        }
 
         notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
+
+        foregroundNotificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        foregroundNotificationManager.createNotificationChannel(foregroundChannel)
     }
 
     /**
@@ -99,6 +112,19 @@ class KakaoNotificationSender(
 
         return unreadChatNotificationMessages
     }
+
+    fun getForegroundNotification(): Notification = NotificationCompat.Builder(context, FOREGROUND_CHANNEL_ID)
+        .setContentTitle(context.getString(R.string.foreground_notification_title))
+        .setSmallIcon(
+            IconCompat.createWithResource(
+                context,
+                R.drawable.ic_noti
+            )
+        )
+        .setPriority(NotificationCompat.PRIORITY_MIN)
+        .setAutoCancel(false)
+        .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+        .build()
 
     private fun sendNotification(chatroomName: String) {
         val unreadChats = kakaoNotificationDao.selectUnreadChatsByChatroomName(chatroomName)

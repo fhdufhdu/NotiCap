@@ -5,4 +5,5 @@
     <string name="quiet_channel_name">카카오톡 무음 알림 캡쳐</string>
     <string name="quiet_channel_description">카카오톡 무음 알림을 가져와서 히스토리와 함께 보여줍니다.</string>
     <string name="reply_label">답장</string>
+    <string name="foreground_notification_title">카카오톡 알림 캡쳐 서비스</string>
 </resources>

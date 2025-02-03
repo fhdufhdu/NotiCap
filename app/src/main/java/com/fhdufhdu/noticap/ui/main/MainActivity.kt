@@ -202,7 +202,7 @@ class MainActivity : AppCompatActivity() {
                 .setNegativeButton("취소") { dialog, _ -> dialog.dismiss() }
                 .setPositiveButton("설정하러 가기") { dialog, _ ->
                     val intent = Intent().apply {
-                        setAction(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                        action = Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
                     }
                     startActivity(intent)
                     dialog.dismiss()

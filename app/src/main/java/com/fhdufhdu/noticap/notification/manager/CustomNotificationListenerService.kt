@@ -7,6 +7,7 @@ import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import androidx.core.app.NotificationCompat
 import androidx.core.app.Person
+import com.fhdufhdu.noticap.R
 import com.fhdufhdu.noticap.notification.room.entities.KakaoNotificationEntity
 import com.fhdufhdu.noticap.util.CoroutineManager
 import com.fhdufhdu.noticap.util.IconConverter
@@ -23,6 +24,7 @@ class CustomNotificationListenerService : NotificationListenerService() {
 
     override fun onCreate() {
         initNotificationSender()
+        startForeground()
         super.onCreate()
     }
 
@@ -45,6 +47,10 @@ class CustomNotificationListenerService : NotificationListenerService() {
             }
         } else if (nPackageName == packageName) {
             val chatroomName = getChatroomName(extras) ?: return
+            if (chatroomName == getString(R.string.foreground_notification_title)) {
+                startForeground()
+                return
+            }
 
             CoroutineManager.run {
                 kakaoNotificationSender?.updateReadStatus(chatroomName)
@@ -113,5 +119,11 @@ class CustomNotificationListenerService : NotificationListenerService() {
             NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification(notification)?.messages
 
         return personList?.get(0)?.person
+    }
+
+    private fun startForeground() {
+        kakaoNotificationSender?.let {
+            startForeground(100000000, it.getForegroundNotification())
+        }
     }
 }
