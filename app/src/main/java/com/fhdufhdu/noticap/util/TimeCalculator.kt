@@ -7,7 +7,10 @@ import java.util.Locale
 class TimeCalculator {
     companion object {
         @SuppressLint("SimpleDateFormat")
-        fun toString(timeFormatType: Int, millis: Long): String {
+        fun toString(
+            timeFormatType: Int,
+            millis: Long,
+        ): String {
             val now = System.currentTimeMillis() / 1000
             val time = millis / 1000
             val calc = now - time

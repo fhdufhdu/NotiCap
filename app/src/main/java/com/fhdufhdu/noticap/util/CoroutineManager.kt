@@ -29,9 +29,10 @@ class CoroutineManager {
         fun <T> runSync(function: () -> T): T {
             var result: T
             runBlocking {
-                result = GlobalScope.async(Dispatchers.IO) {
-                    function()
-                }.await()
+                result =
+                    GlobalScope.async(Dispatchers.IO) {
+                        function()
+                    }.await()
             }
             return result
         }

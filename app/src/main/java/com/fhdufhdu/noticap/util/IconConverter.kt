@@ -10,7 +10,6 @@ import androidx.core.graphics.drawable.toIcon
 import java.io.ByteArrayOutputStream
 
 class IconConverter {
-
     companion object {
         fun stringToBitmap(encodedString: String?): Bitmap? {
             return try {
@@ -45,7 +44,10 @@ class IconConverter {
         //        fun iconToString(icon:Icon, context: Context): String?{
 //            return bitmapToString(icon.loadDrawable(context)!!.toBitmap())
 //        }
-        fun iconToString(icon: Icon?, context: Context): String? {
+        fun iconToString(
+            icon: Icon?,
+            context: Context,
+        ): String? {
             if (icon != null) {
                 return bitmapToString(icon.loadDrawable(context)!!.toBitmap())
             }

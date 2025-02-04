@@ -4,18 +4,10 @@
     <PreferenceCategory
         android:title="알림 설정"
         app:iconSpaceReserved="false">
-        <ListPreference
-            app:iconSpaceReserved="false"
-            android:entries="@array/array_time_format"
-            android:entryValues="@array/array_time_format_value"
-            android:key="TIME_FORMAT"
-            android:title="시간 표시 방법"
-            android:summary="시간을 어떻게 표시할 지 선택합니다."
-            android:defaultValue="2"/>
         <SwitchPreference
             app:iconSpaceReserved="false"
             android:key="TO_MOVE_TO_KAKAO"
-            android:title="알림 내역 터치 시 해당 채팅방으로 이동"
+            android:title="알림 내역 터치 시 카카오톡 채팅방으로 이동"
             android:defaultValue="true"/>
     </PreferenceCategory>
 </PreferenceScreen>
