@@ -65,7 +65,7 @@ class KakaoTalkNotificationManager(
                 val name = StringBuilder(it.sender.name)
                 if (it.sender.name != it.chatroom.name) {
                     name.append("(")
-                    name.append(it.chatroom)
+                    name.append(it.chatroom.name)
                     name.append(")")
                 }
                 val personBuilder =

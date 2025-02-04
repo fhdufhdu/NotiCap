@@ -46,8 +46,7 @@ class KakaoTalkNotificationListenerService : NotificationListenerService() {
 
         try {
             if (nPackageName == KAKAOTALK_PACKAGE_NAME) {
-                val notificationTitle = NotificationTitle.from(extras)
-                val chatroom = Chatroom.from(notificationTitle)
+                val chatroom = Chatroom.from(extras)
 
                 ConversationRepository.clear(chatroom)
 
@@ -62,7 +61,7 @@ class KakaoTalkNotificationListenerService : NotificationListenerService() {
                     return
                 }
 
-                val chatroom = Chatroom.from(notificationTitle)
+                val chatroom = Chatroom.from(extras)
                 ConversationRepository.clear(chatroom)
             }
         } catch (exception: UnusableNotificationException) {

@@ -6,6 +6,6 @@ import android.os.Bundle
 @JvmInline
 value class Content(val text: String) {
     companion object {
-        fun from(notificationExtra: Bundle) = Content(notificationExtra.getString(Notification.EXTRA_TEXT) ?: "")
+        fun from(notificationExtras: Bundle) = Content(notificationExtras.getString(Notification.EXTRA_TEXT) ?: "")
     }
 }

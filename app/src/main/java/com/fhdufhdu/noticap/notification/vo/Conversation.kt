@@ -21,8 +21,7 @@ data class Conversation(
                     ?.get(0)
                     ?.person ?: throw UnusableNotificationException("발신자 없는 알림")
 
-            val notificationTitle = NotificationTitle.from(extras)
-            val chatroom = Chatroom.from(notificationTitle)
+            val chatroom = Chatroom.from(extras)
             val sender = Sender.from(person)
             val content = Content.from(extras)
             val time = Time.from(notification)

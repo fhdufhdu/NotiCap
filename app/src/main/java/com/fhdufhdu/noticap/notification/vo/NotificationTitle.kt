@@ -8,9 +8,9 @@ data class NotificationTitle(
     val title: String,
 ) {
     companion object {
-        fun from(notificationExtra: Bundle) =
+        fun from(notificationExtras: Bundle) =
             NotificationTitle(
-                notificationExtra.getString(Notification.EXTRA_TITLE)
+                notificationExtras.getString(Notification.EXTRA_TITLE)
                     ?: throw UnusableNotificationException("제목 없는 알림"),
             )
     }
