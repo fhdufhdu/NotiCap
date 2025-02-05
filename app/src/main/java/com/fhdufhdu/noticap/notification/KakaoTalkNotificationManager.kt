@@ -7,21 +7,20 @@ import android.content.Context
 import androidx.core.app.NotificationCompat
 import androidx.core.app.Person
 import androidx.core.graphics.drawable.IconCompat
-import androidx.preference.PreferenceManager
 import com.fhdufhdu.noticap.R
 import com.fhdufhdu.noticap.notification.vo.Chatroom
 import com.fhdufhdu.noticap.notification.vo.Conversation
+import com.fhdufhdu.noticap.util.SharedPreferenceManager
 
 private const val NOTIFICATION_GROUP_KEY = "NOTI_GRUOP_KEY"
 private const val CHANNEL_ID = "CAPTURE"
-private const val FOREGROUND_CHANNEL_ID = "FOREGROUND"
 
 class KakaoTalkNotificationManager(
     private val context: Context,
 ) {
     private val notificationManager: NotificationManager
     private val foregroundNotificationManager: NotificationManager
-    private val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+    private val sharedPreferencesManager = SharedPreferenceManager(context)
 
     init {
         val name = context.getString(R.string.channel_name)
@@ -129,11 +128,9 @@ class KakaoTalkNotificationManager(
                 .setAutoCancel(true)
                 .setWhen(unreadChatsNotificationMessages.last().timestamp + 1)
 
-        val toMoveToKakao = sharedPreferences.getBoolean("TO_MOVE_TO_KAKAO", true)
-        if (toMoveToKakao)
-            {
-                builder = builder.setContentIntent(conversationList[0].intent)
-            }
+        if (sharedPreferencesManager.isMoveToKakao(context)) {
+            builder = builder.setContentIntent(conversationList[0].intent)
+        }
 
         val summaryNotification: Notification =
             NotificationCompat.Builder(context, CHANNEL_ID)
@@ -153,5 +150,9 @@ class KakaoTalkNotificationManager(
 
         notificationManager.notify(notificationId, builder.build())
         notificationManager.notify(1234, summaryNotification)
+    }
+
+    companion object {
+        const val FOREGROUND_CHANNEL_ID = "FOREGROUND"
     }
 }

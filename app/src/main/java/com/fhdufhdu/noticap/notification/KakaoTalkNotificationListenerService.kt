@@ -6,10 +6,8 @@ import android.os.Build
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
-import com.fhdufhdu.noticap.R
 import com.fhdufhdu.noticap.notification.vo.Chatroom
 import com.fhdufhdu.noticap.notification.vo.Conversation
-import com.fhdufhdu.noticap.notification.vo.NotificationTitle
 
 private const val KAKAOTALK_PACKAGE_NAME = "com.kakao.talk"
 private const val FOREGROUND_NOTIFICATION_ID = 100000000
@@ -42,30 +40,30 @@ class KakaoTalkNotificationListenerService : NotificationListenerService() {
         initNotificationSender()
 
         val nPackageName = sbn.packageName
+        val notification = sbn.notification
         val extras = sbn.notification.extras
+
+        // foreground 알림인 경우 다시 생성한다.
+        if (notification.channelId == KakaoTalkNotificationManager.FOREGROUND_CHANNEL_ID) {
+            startForeground()
+            return
+        }
 
         try {
             if (nPackageName == KAKAOTALK_PACKAGE_NAME) {
+                // 카카오톡 알림이 제거되는 경우 Noticap 알림도 제거한다.
                 val chatroom = Chatroom.from(extras)
 
                 ConversationRepository.clear(chatroom)
 
                 kakaoTalkNotificationManager?.sendNotification(chatroom)
             } else if (nPackageName == packageName) {
-                val notificationTitle = NotificationTitle.from(extras)
-                val foregroundTitle =
-                    NotificationTitle(getString(R.string.foreground_notification_title))
-
-                if (notificationTitle == foregroundTitle) {
-                    startForeground()
-                    return
-                }
-
+                // Noticap 알림만 제거되는 경우 다시 알림을 살린다.
                 val chatroom = Chatroom.from(extras)
-                ConversationRepository.clear(chatroom)
+                kakaoTalkNotificationManager?.sendNotification(chatroom)
             }
         } catch (exception: UnusableNotificationException) {
-            Log.e("사용할 수 없는 알림", exception.toString())
+            Log.d(this.javaClass.name, exception.toString())
         }
     }
 
@@ -76,15 +74,15 @@ class KakaoTalkNotificationListenerService : NotificationListenerService() {
         val nPackageName = sbn.packageName
         val notification = sbn.notification
 
-        if (nPackageName == KAKAOTALK_PACKAGE_NAME) {
-            try {
+        try {
+            if (nPackageName == KAKAOTALK_PACKAGE_NAME) {
                 val conversation = Conversation.fromKakao(notification)
                 ConversationRepository.add(conversation)
 
                 kakaoTalkNotificationManager?.sendNotification(conversation.chatroom)
-            } catch (exception: UnusableNotificationException) {
-                Log.e("사용할 수 없는 알림", exception.toString())
             }
+        } catch (exception: UnusableNotificationException) {
+            Log.d(this.javaClass.name, exception.toString())
         }
     }
 

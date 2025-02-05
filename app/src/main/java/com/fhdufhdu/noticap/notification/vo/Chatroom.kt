@@ -3,7 +3,6 @@ package com.fhdufhdu.noticap.notification.vo
 import android.app.Notification
 import android.os.Bundle
 import com.fhdufhdu.noticap.notification.UnusableNotificationException
-import kotlinx.coroutines.channels.Channel
 
 @JvmInline
 value class Chatroom(val name: String) {
