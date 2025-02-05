@@ -22,6 +22,9 @@ class KakaoTalkNotificationManager(
     private val foregroundNotificationManager: NotificationManager
     private val sharedPreferencesManager = SharedPreferenceManager(context)
 
+    /**
+     * NotificationManager 초기화
+     */
     init {
         val name = context.getString(R.string.channel_name)
         val descriptionText = context.getString(R.string.channel_description)
@@ -85,6 +88,9 @@ class KakaoTalkNotificationManager(
         return unreadChatNotificationMessages
     }
 
+    /**
+     * Foreground 서비스 활성화를 위한 Notification 객체 생성
+     */
     fun getForegroundNotification(): Notification =
         NotificationCompat.Builder(context, FOREGROUND_CHANNEL_ID)
             .setContentTitle(context.getString(R.string.foreground_notification_title))
