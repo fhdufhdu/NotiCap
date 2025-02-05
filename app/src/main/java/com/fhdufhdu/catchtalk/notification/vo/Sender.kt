@@ -1,4 +1,4 @@
-package com.fhdufhdu.noticap.notification.vo
+package com.fhdufhdu.catchtalk.notification.vo
 
 import androidx.core.app.Person
 import androidx.core.graphics.drawable.IconCompat

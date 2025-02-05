@@ -10,6 +10,6 @@
         android:id="@+id/fragment_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:name="com.fhdufhdu.noticap.ui.setting.SettingFragment" />
+        android:name="com.fhdufhdu.catchtalk.ui.setting.SettingFragment" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

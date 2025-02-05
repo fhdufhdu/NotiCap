@@ -1,4 +1,4 @@
-package com.fhdufhdu.noticap.notification
+package com.fhdufhdu.catchtalk.notification
 
 import android.content.Intent
 import android.content.pm.ServiceInfo
@@ -6,8 +6,8 @@ import android.os.Build
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
-import com.fhdufhdu.noticap.notification.vo.Chatroom
-import com.fhdufhdu.noticap.notification.vo.Conversation
+import com.fhdufhdu.catchtalk.notification.vo.Chatroom
+import com.fhdufhdu.catchtalk.notification.vo.Conversation
 
 private const val KAKAOTALK_PACKAGE_NAME = "com.kakao.talk"
 private const val FOREGROUND_NOTIFICATION_ID = 100000000

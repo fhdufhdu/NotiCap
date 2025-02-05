@@ -1,4 +1,4 @@
-package com.fhdufhdu.noticap.ui.main
+package com.fhdufhdu.catchtalk.ui.main
 
 import android.Manifest
 import android.app.NotificationManager
@@ -14,10 +14,10 @@ import android.provider.Settings
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
-import com.fhdufhdu.noticap.R
-import com.fhdufhdu.noticap.databinding.ActivityMainBinding
-import com.fhdufhdu.noticap.notification.KakaoTalkNotificationListenerService
-import com.fhdufhdu.noticap.ui.setting.SettingFragment
+import com.fhdufhdu.catchtalk.R
+import com.fhdufhdu.catchtalk.databinding.ActivityMainBinding
+import com.fhdufhdu.catchtalk.notification.KakaoTalkNotificationListenerService
+import com.fhdufhdu.catchtalk.ui.setting.SettingFragment
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.normal.TedPermission
 
@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        supportActionBar?.title = "NotiCap 설정"
+        supportActionBar?.title = "설정"
 
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, SettingFragment(), "setting_fragment")

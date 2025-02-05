@@ -1,6 +1,6 @@
-package com.fhdufhdu.noticap.notification
+package com.fhdufhdu.catchtalk.notification
 
-import com.fhdufhdu.noticap.notification.vo.Chatroom
+import com.fhdufhdu.catchtalk.notification.vo.Chatroom
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 import java.util.concurrent.atomic.AtomicInteger

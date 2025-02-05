@@ -1,4 +1,4 @@
-package com.fhdufhdu.noticap.ui.theme
+package com.fhdufhdu.catchtalk.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

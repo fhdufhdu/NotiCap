@@ -1,8 +1,8 @@
-package com.fhdufhdu.noticap.ui.setting
+package com.fhdufhdu.catchtalk.ui.setting
 
 import android.os.Bundle
 import androidx.preference.PreferenceFragmentCompat
-import com.fhdufhdu.noticap.R
+import com.fhdufhdu.catchtalk.R
 
 class SettingFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(

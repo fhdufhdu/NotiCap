@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "NotiCap"
+rootProject.name = "CatchTalk"
 include(":app")

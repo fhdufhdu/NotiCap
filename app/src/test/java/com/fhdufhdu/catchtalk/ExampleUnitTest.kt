@@ -1,4 +1,4 @@
-package com.fhdufhdu.noticap
+package com.fhdufhdu.catchtalk
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

@@ -1,4 +1,4 @@
-package com.fhdufhdu.noticap
+package com.fhdufhdu.catchtalk
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry

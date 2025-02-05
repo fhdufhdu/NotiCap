@@ -1,4 +1,4 @@
-package com.fhdufhdu.noticap.notification.vo
+package com.fhdufhdu.catchtalk.notification.vo
 
 import android.app.Notification
 

@@ -1,9 +1,9 @@
-package com.fhdufhdu.noticap.notification.vo
+package com.fhdufhdu.catchtalk.notification.vo
 
 import android.app.Notification
 import android.app.PendingIntent
 import androidx.core.app.NotificationCompat
-import com.fhdufhdu.noticap.notification.UnusableNotificationException
+import com.fhdufhdu.catchtalk.notification.UnusableNotificationException
 
 data class Conversation(
     val chatroom: Chatroom,

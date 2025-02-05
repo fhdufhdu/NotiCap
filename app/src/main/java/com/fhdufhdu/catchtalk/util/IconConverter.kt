@@ -1,4 +1,4 @@
-package com.fhdufhdu.noticap.util
+package com.fhdufhdu.catchtalk.util
 
 import android.content.Context
 import android.graphics.Bitmap

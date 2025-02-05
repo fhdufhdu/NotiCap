@@ -1,8 +1,8 @@
-package com.fhdufhdu.noticap.notification.vo
+package com.fhdufhdu.catchtalk.notification.vo
 
 import android.app.Notification
 import android.os.Bundle
-import com.fhdufhdu.noticap.notification.UnusableNotificationException
+import com.fhdufhdu.catchtalk.notification.UnusableNotificationException
 
 @JvmInline
 value class Chatroom(val name: String) {

@@ -1,4 +1,4 @@
-package com.fhdufhdu.noticap.notification
+package com.fhdufhdu.catchtalk.notification
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -7,10 +7,10 @@ import android.content.Context
 import androidx.core.app.NotificationCompat
 import androidx.core.app.Person
 import androidx.core.graphics.drawable.IconCompat
-import com.fhdufhdu.noticap.R
-import com.fhdufhdu.noticap.notification.vo.Chatroom
-import com.fhdufhdu.noticap.notification.vo.Conversation
-import com.fhdufhdu.noticap.util.SharedPreferenceManager
+import com.fhdufhdu.catchtalk.R
+import com.fhdufhdu.catchtalk.notification.vo.Chatroom
+import com.fhdufhdu.catchtalk.notification.vo.Conversation
+import com.fhdufhdu.catchtalk.util.SharedPreferenceManager
 
 private const val NOTIFICATION_GROUP_KEY = "NOTI_GRUOP_KEY"
 private const val CHANNEL_ID = "CAPTURE"
@@ -29,9 +29,12 @@ class KakaoTalkNotificationManager(
             NotificationChannel(
                 CHANNEL_ID,
                 name,
-                NotificationManager.IMPORTANCE_DEFAULT,
+                NotificationManager.IMPORTANCE_LOW,
             ).apply {
                 description = descriptionText
+                setShowBadge(false)
+                enableVibration(false)
+                enableLights(false)
             }
         val foregroundChannel =
             NotificationChannel(

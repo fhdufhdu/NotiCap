@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.fhdufhdu.noticap"
+    namespace = "com.fhdufhdu.catchtalk"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.fhdufhdu.noticap"
+        applicationId = "com.fhdufhdu.catchtalk"
         minSdk = 28
         targetSdk = 34
         versionCode = 1
