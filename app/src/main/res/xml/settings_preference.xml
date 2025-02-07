@@ -9,5 +9,10 @@
             android:key="TO_MOVE_TO_KAKAO"
             android:title="알림 내역 터치 시 카카오톡 채팅방으로 이동"
             android:defaultValue="true"/>
+        <SwitchPreference
+            app:iconSpaceReserved="false"
+            android:key="IS_REMOVE_KAKAO_NOTI"
+            android:title="카카오톡 알림을 제거하고 캐치톡 알림만 사용"
+            android:defaultValue="false"/>
     </PreferenceCategory>
 </PreferenceScreen>

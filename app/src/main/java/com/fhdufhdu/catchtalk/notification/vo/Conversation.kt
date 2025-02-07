@@ -1,7 +1,7 @@
 package com.fhdufhdu.catchtalk.notification.vo
 
-import android.app.Notification
 import android.app.PendingIntent
+import android.service.notification.StatusBarNotification
 import androidx.core.app.NotificationCompat
 import com.fhdufhdu.catchtalk.notification.UnusableNotificationException
 
@@ -13,7 +13,8 @@ data class Conversation(
     val intent: PendingIntent,
 ) {
     companion object {
-        fun fromKakao(notification: Notification): Conversation {
+        fun fromKakao(sbn: StatusBarNotification): Conversation {
+            val notification = sbn.notification
             val extras = notification.extras
             val person =
                 NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification(notification)
@@ -21,7 +22,7 @@ data class Conversation(
                     ?.get(0)
                     ?.person ?: throw UnusableNotificationException("발신자 없는 알림")
 
-            val chatroom = Chatroom.from(extras)
+            val chatroom = Chatroom.from(sbn)
             val sender = Sender.from(person)
             val content = Content.from(extras)
             val time = Time.from(notification)

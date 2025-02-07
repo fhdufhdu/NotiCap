@@ -62,6 +62,11 @@ class MainActivity : AppCompatActivity() {
         openBatteryOptimizationSettingDialog()
     }
 
+    override fun onStart() {
+        startForegroundService(Intent(this, KakaoTalkNotificationListenerService::class.java))
+        super.onStart()
+    }
+
     private fun isNotiPermissionGranted(): Boolean {
         val notificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

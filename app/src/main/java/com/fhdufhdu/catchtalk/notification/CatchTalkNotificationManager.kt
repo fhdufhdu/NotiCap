@@ -3,7 +3,9 @@ package com.fhdufhdu.catchtalk.notification
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.Person
 import androidx.core.graphics.drawable.IconCompat
@@ -13,48 +15,48 @@ import com.fhdufhdu.catchtalk.notification.vo.Conversation
 import com.fhdufhdu.catchtalk.util.SharedPreferenceManager
 
 private const val NOTIFICATION_GROUP_KEY = "NOTI_GRUOP_KEY"
-private const val CHANNEL_ID = "CAPTURE"
+private const val CHANNEL_ID = "CATCHTALK"
+private const val SILENT_CHANNEL_ID = "SILENT_CATCHTALK"
 
-class KakaoTalkNotificationManager(
+class CatchTalkNotificationManager(
     private val context: Context,
 ) {
     private val notificationManager: NotificationManager
-    private val foregroundNotificationManager: NotificationManager
     private val sharedPreferencesManager = SharedPreferenceManager(context)
 
     /**
      * NotificationManager 초기화
      */
     init {
-        val name = context.getString(R.string.channel_name)
-        val descriptionText = context.getString(R.string.channel_description)
         val channel =
             NotificationChannel(
                 CHANNEL_ID,
-                name,
+                context.getString(R.string.channel_name),
+                NotificationManager.IMPORTANCE_HIGH,
+            ).apply {
+                description = context.getString(R.string.channel_description)
+            }
+        val quietChannel =
+            NotificationChannel(
+                SILENT_CHANNEL_ID,
+                context.getString(R.string.quiet_channel_name),
                 NotificationManager.IMPORTANCE_LOW,
             ).apply {
-                description = descriptionText
-                setShowBadge(false)
-                enableVibration(false)
-                enableLights(false)
+                description = context.getString(R.string.quiet_channel_description)
             }
         val foregroundChannel =
             NotificationChannel(
                 FOREGROUND_CHANNEL_ID,
-                "서비스 활성화",
+                context.getString(R.string.foreground_channel_name),
                 NotificationManager.IMPORTANCE_MIN,
             ).apply {
-                description = "서비스 활성화 알림"
+                description = context.getString(R.string.foreground_channel_description)
+                setShowBadge(false)
             }
 
         notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.createNotificationChannel(channel)
-
-        foregroundNotificationManager =
-            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        foregroundNotificationManager.createNotificationChannel(foregroundChannel)
+        notificationManager.createNotificationChannels(listOf(channel, quietChannel, foregroundChannel))
     }
 
     /**
@@ -121,8 +123,10 @@ class KakaoTalkNotificationManager(
             messageStyle = messageStyle.addMessage(it)
         }
 
+        val channelId = if (chatroom.quiet || !sharedPreferencesManager.isRemoveKakaoNoti()) SILENT_CHANNEL_ID else CHANNEL_ID
+
         var builder =
-            NotificationCompat.Builder(context, CHANNEL_ID)
+            NotificationCompat.Builder(context, channelId)
                 .setSmallIcon(
                     IconCompat.createWithResource(
                         context,
@@ -137,12 +141,30 @@ class KakaoTalkNotificationManager(
                 .setAutoCancel(true)
                 .setWhen(unreadChatsNotificationMessages.last().timestamp + 1)
 
-        if (sharedPreferencesManager.isMoveToKakao(context)) {
+        if (sharedPreferencesManager.isMoveToKakao()) {
             builder = builder.setContentIntent(conversationList[0].intent)
         }
 
+        if (sharedPreferencesManager.isRemoveKakaoNoti()) {
+            builder =
+                builder.addAction(
+                    R.drawable.transparent,
+                    "읽음",
+                    PendingIntent.getBroadcast(
+                        context,
+                        notificationId,
+                        Intent(context, ReadNotificationActionReceiver::class.java).apply {
+                            action = ReadNotificationActionReceiver.READ_NOTIFICATION_ACTION
+                            putExtra(ReadNotificationActionReceiver.NOTIFICATION_ID_KEY, notificationId)
+                            putExtra(ReadNotificationActionReceiver.CHATROOM_KEY, chatroom)
+                        },
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                    ),
+                )
+        }
+
         val summaryNotification: Notification =
-            NotificationCompat.Builder(context, CHANNEL_ID)
+            NotificationCompat.Builder(context, SILENT_CHANNEL_ID)
                 .setSmallIcon(
                     IconCompat.createWithResource(
                         context,
